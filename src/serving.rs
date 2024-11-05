@@ -270,7 +270,8 @@ impl Site {
 							.expect("Failed to decode URL");
 
 						if p == "_dev.js" {
-							let res = Response::new(include_str!("./refresh_websocket.js").into());
+							let res =
+								Response::new(include_str!("./js/refresh_websocket.js").into());
 							return Ok(res);
 						}
 
