@@ -128,11 +128,6 @@ struct ResourceListTemplateData<'r> {
 	next: Option<usize>,
 }
 
-#[derive(Debug, Serialize)]
-struct ExtraResourceRenderData {
-	head: String,
-}
-
 /// Config for the resource builder.
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct ResourceBuilderConfig {
@@ -254,26 +249,12 @@ impl ResourceBuilder {
 		resource: &ResourceMetadata,
 	) -> eyre::Result<()> {
 		let out_path = self.build_path(&builder.build_path, &id);
-		let out = {
-			let data = ResourceTemplateData {
-				resource,
-				id,
-				timestamp: resource.timestamp,
-			};
-			builder.tera.render(
-				&self.config.resource_template,
-				&tera::Context::from_serialize(data)?,
-			)?
-		};
 
-		let out = builder.build_page_raw_with_extra_data(
+		let out = builder.build_page_raw(
 			PageMetadata {
+				template: Some(self.config.resource_template.clone()),
 				title: Some(resource.title.clone()),
-				..Default::default()
-			},
-			&out,
-			ExtraResourceRenderData {
-				head: EmbedMetadata {
+				embed: Some(EmbedMetadata {
 					title: resource.title.clone(),
 					site_name: builder.site.config.title.clone(),
 					description: resource.desc.clone(),
@@ -285,8 +266,14 @@ impl ResourceBuilder {
 					url: None,
 					theme_color: EmbedMetadata::default_theme_color(),
 					large_image: true,
-				}
-				.build(),
+				}),
+				..Default::default()
+			},
+			"",
+			ResourceTemplateData {
+				resource,
+				id,
+				timestamp: resource.timestamp,
 			},
 		)?;
 		std::fs::write(out_path, out)?;
@@ -338,24 +325,21 @@ impl ResourceBuilder {
 			let mut next;
 			for (page, iter) in list.iter().chunks(items_per_page).into_iter().enumerate() {
 				next = (page + 1 != page_max).then_some(page + 2);
-				let data = ResourceListTemplateData {
-					resources: iter.copied().collect(),
-					tag,
-					page: page + 1,
-					page_max,
-					previous,
-					next,
-				};
-				let out = builder.tera.render(
-					&config.resource_list_template,
-					&tera::Context::from_serialize(data)?,
-				)?;
 				let out = builder.build_page_raw(
 					PageMetadata {
+						template: Some(config.resource_list_template.clone()),
 						title: Some(title.to_owned()),
 						..Default::default()
 					},
-					&out,
+					"",
+					ResourceListTemplateData {
+						resources: iter.copied().collect(),
+						tag,
+						page: page + 1,
+						page_max,
+						previous,
+						next,
+					},
 				)?;
 				if page == 0 {
 					std::fs::write(out_path.join("index.html"), &out)?;

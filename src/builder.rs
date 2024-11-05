@@ -246,16 +246,8 @@ impl SiteBuilder {
 		Ok(String::from_utf8(output)?)
 	}
 
-	pub fn build_page_raw(
-		&self,
-		page_metadata: PageMetadata,
-		page_html: &str,
-	) -> eyre::Result<String> {
-		self.build_page_raw_with_extra_data(page_metadata, page_html, ())
-	}
-
 	/// Helper to build a page without writing it to disk.
-	pub fn build_page_raw_with_extra_data<T>(
+	pub fn build_page_raw<T>(
 		&self,
 		mut page_metadata: PageMetadata,
 		page_html: &str,
@@ -318,7 +310,7 @@ impl SiteBuilder {
 		let mut page_html = String::new();
 		pulldown_cmark::html::push_html(&mut page_html, parser);
 
-		let out = self.build_page_raw(page.data.unwrap_or_default(), &page_html)?;
+		let out = self.build_page_raw(page.data.unwrap_or_default(), &page_html, ())?;
 
 		let out_path = self.build_path.join(page_name).with_extension("html");
 		std::fs::create_dir_all(out_path.parent().unwrap())

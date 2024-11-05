@@ -1,3 +1,5 @@
+{% extends "base.tera" %}
+{% block content %}
 <h1>{{ title }}</h1>
 <div class="link-list">
 	<ul>
@@ -6,3 +8,4 @@
 		{% endfor %}
 	</ul>
 </div>
+{% endblock content %}

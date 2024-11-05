@@ -29,18 +29,15 @@ pub fn render_basic_link_list(
 	links: Vec<Link>,
 	title: &str,
 ) -> eyre::Result<String> {
-	let data = LinkTemplateData { links, title };
-	let out = builder
-		.tera
-		.render(template, &tera::Context::from_serialize(data)?)?;
-	let out = builder.build_page_raw(
+	builder.build_page_raw(
 		PageMetadata {
+			template: Some(template.to_owned()),
 			title: Some(title.to_owned()),
 			..Default::default()
 		},
-		&out,
-	)?;
-	Ok(out)
+		"",
+		LinkTemplateData { links, title },
+	)
 }
 
 /// Template data for a list of links.
