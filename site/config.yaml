@@ -1,7 +1,7 @@
-base_url: "https://zyl.gay"
-title: zyl is gay
-description: "zyl's website."
-sass_styles: [index.scss, pet.scss, click.scss]
+base_url: "https://webdog.zyl.gay"
+title: webdog
+description: "static site builder for dogs"
+sass_styles: [index.scss]
 cdn_url: "https://i.zyl.gay"
 
 resources:
@@ -13,23 +13,9 @@ resources:
     resource_list_template: blog-list.tera
     tag_list_template: basic-link-list.tera
     rss_template: rss/blog-post.tera
-    rss_title: zyl's blog
-    rss_description: feed of recent blog posts on zyl's website.
+    rss_title: webdog blog
+    rss_description: feed of recent webdog blog posts.
     list_title: blog
     tag_list_title: blog tags
     resource_name_plural: blog posts
     resources_per_page: 20
-  images:
-    source_path: images
-    output_path_short: i
-    output_path_long: images
-    resource_template: image.tera
-    resource_list_template: images.tera
-    tag_list_template: basic-link-list.tera
-    rss_template: rss/image.tera
-    rss_title: zyl's images
-    rss_description: feed of newly uploaded images from zyl's website.
-    list_title: images
-    tag_list_title: image tags
-    resource_name_plural: images
-    resources_per_page: 10

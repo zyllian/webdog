@@ -1,5 +1,3 @@
-# zyl.gay
+# webdog
 
-Source for my website (located at [zyl.gay](https://zyl.gay)) and the custom static site generator I've built alongside it.
-
-Feel free to make or suggest changes.
+Source for webdog, the static site generator fit for a dog. See our website at https://webdog.zyl.gay for more details.

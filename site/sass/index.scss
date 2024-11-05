@@ -59,48 +59,6 @@ abbr {
   cursor: help;
 }
 
-.images-list {
-  display: flex;
-  flex-wrap: wrap;
-
-  .image {
-    position: relative;
-    padding: 4px;
-    height: auto;
-
-    .image-actual {
-      display: block;
-      width: 300px;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .title {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      padding: 4px;
-      margin: 4px;
-      background-color: rgba(0, 0, 0, 0.7);
-      color: white;
-    }
-  }
-}
-
-.image-full {
-  .title,
-  .tags-title {
-    margin-bottom: 0;
-  }
-
-  .image-actual {
-    width: 100%;
-    max-height: 80vh;
-    object-fit: contain;
-    background-color: rgba(0, 0, 0, 0.3);
-  }
-}
-
 .blog-post-list {
   .post {
     p {
@@ -207,14 +165,4 @@ abbr {
 
 .flex-spacer {
   flex-grow: 1;
-}
-
-#pet-counter {
-  position: fixed;
-  bottom: 4px;
-  right: 4px;
-
-  .internal {
-    display: none;
-  }
 }

@@ -1,3 +1,0 @@
-CREATE TABLE pets (count INTEGER NOT NULL DEFAULT 0);
-
-INSERT INTO pets (count) VALUES (0);

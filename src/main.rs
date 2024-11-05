@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use zyl_site::Site;
+use webdog::Site;
 
 #[cfg(feature = "serve")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

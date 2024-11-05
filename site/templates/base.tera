@@ -1,7 +1,3 @@
-{% macro badge(badge, url, alt) %}
-<a href="{{url}}"><img src="/badges/{{badge}}" alt="{{alt}}"></a>
-{% endmacro badge %}
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +6,6 @@
 	<meta name="referrer" content="no-referrer">
 	<link rel="stylesheet" href="/styles/index.css">
 	<title>{{ title }}</title>
-	<script type="text/javascript" src="/js/pet-me.js" defer></script>
 	{{ head | safe }}
 	{% for script in scripts %}
 	<script type="text/javascript" src="{{script}}" defer></script>
@@ -23,39 +18,16 @@
 <body>
 	<header class="main-header">
 		<span>
-			<a class="name" href="/">zyl's website</a> |
-			<span class="pronouns">it/puppy(/she)</span>
+			<a class="name" href="/">webdog</a>
 		</span>
 		<span class="spacer"></span>
-		<a href="/games">games</a> |
-		<a href="/projects">my projects</a> |
 		<a href="/blog/">blog</a> |
-		<a href="/images/">images</a> |
-		<a href="/pay-me">pay me!</a> |
-		<a href="https://github.com/zyllian/zyllian.github.io" rel="noopener noreferrer">source</a>
+		<a href="https://github.com/zyllian/webdog" rel="noopener noreferrer">github</a>
 	</header>
 	<div id="content">
 		<main class="page">
 			{% block content %}{{ page | safe }}{% endblock content %}
 		</main>
-	</div>
-
-	<div class="flex-spacer"></div>
-	<hr />
-	<footer id="footer">
-		bark bark awruff :3
-
-		<div class="badges">
-			{{ self::badge(badge="transbian.png", url="https://badge.les.bi", alt="transgender and lesbian flags") }}
-		</div>
-	</footer>
-
-	<div id="pet-counter">
-		<noscript>enable js to pet me :3</noscript>
-		<div class="internal">
-			<span class="count">???</span> pets
-			<button>pet me :3</button>
-		</div>
 	</div>
 </body>
 

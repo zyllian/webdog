@@ -1,6 +1,6 @@
 [package]
-edition = "2018"
-name = "zyl-site"
+edition = "2021"
+name = "webdog"
 version = "0.1.0"
 
 [dependencies]

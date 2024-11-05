@@ -2708,6 +2708,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65fc09f10666a9f147042251e0dda9c18f166ff7de300607007e96bdebc1068d"
 
 [[package]]
+name = "webdog"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "extract-frontmatter",
+ "eyre",
+ "fs_extra",
+ "futures",
+ "grass",
+ "hotwatch",
+ "itertools",
+ "lol_html",
+ "minifier",
+ "percent-encoding",
+ "pulldown-cmark",
+ "rayon",
+ "rss",
+ "serde",
+ "serde_yml",
+ "tera",
+ "time",
+ "tokio",
+ "url",
+ "walkdir",
+ "warp",
+]
+
+[[package]]
 name = "winapi-util"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2971,32 +2999,4 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.87",
-]
-
-[[package]]
-name = "zyl-site"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "extract-frontmatter",
- "eyre",
- "fs_extra",
- "futures",
- "grass",
- "hotwatch",
- "itertools",
- "lol_html",
- "minifier",
- "percent-encoding",
- "pulldown-cmark",
- "rayon",
- "rss",
- "serde",
- "serde_yml",
- "tera",
- "time",
- "tokio",
- "url",
- "walkdir",
- "warp",
 ]

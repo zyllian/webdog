@@ -1,8 +1,8 @@
 ---
-title: being gay is so cool
-timestamp: 2023-11-14T23:09:00.00Z
-tags: [gay, lesbiab, trans]
-desc: holy shit being gay is cool y'all
+title: test post
+timestamp: 2024-11-04T17:29:00.00Z
+tags: [first, post, test, webdog]
+desc: the first post wowie
 cdn_file: 2023/11/pfp.png
 header_image_alt: A dead Among Us bean layered on top of transgender, lesbian, and bisexual pride flags.
 ---
