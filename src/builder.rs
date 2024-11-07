@@ -6,10 +6,14 @@ use eyre::{eyre, Context, OptionExt};
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
 use pulldown_cmark::{Options, Parser};
 use serde::Serialize;
+use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tera::Tera;
 use url::Url;
 
 use crate::{resource::ResourceBuilder, util, PageMetadata, Site, ROOT_PATH, SASS_PATH};
+
+/// Path for static webdog resources included with the site build.
+const WEBDOG_PATH: &str = "webdog";
 
 /// Struct containing data to be sent to templates when rendering them.
 #[derive(Debug, Serialize)]
@@ -33,6 +37,10 @@ struct TemplateData<'a, T> {
 pub struct SiteBuilder {
 	/// The Handlebars registry used to render templates.
 	pub(crate) tera: Tera,
+	/// The syntax set used to render source code.
+	pub(crate) syntax_set: SyntaxSet,
+	/// The theme set used to render source code.
+	pub(crate) theme_set: ThemeSet,
 	/// The site info used to build the site.
 	pub site: Site,
 	/// The path to the build directory.
@@ -66,6 +74,8 @@ impl SiteBuilder {
 
 		Self {
 			tera,
+			syntax_set: SyntaxSet::load_defaults_newlines(),
+			theme_set: ThemeSet::load_defaults(),
 			resource_builders: HashMap::new(),
 			site,
 			build_path,
@@ -92,6 +102,13 @@ impl SiteBuilder {
 			std::fs::create_dir(&self.build_path).wrap_err("Failed to create build directory")?;
 		}
 
+		let webdog_path = self.build_path.join(WEBDOG_PATH);
+		std::fs::create_dir(&webdog_path)?;
+		std::fs::write(
+			webdog_path.join("webdog.js"),
+			include_str!("./js/webdog.js"),
+		)?;
+
 		let root_path = self.site.site_path.join(ROOT_PATH);
 		if root_path.exists() {
 			for entry in walkdir::WalkDir::new(&root_path) {
@@ -114,6 +131,10 @@ impl SiteBuilder {
 
 	/// Performs actions that need to be done when the config changes while serving.
 	pub fn reload(&mut self) -> eyre::Result<()> {
+		self.site
+			.config
+			.check(self)
+			.wrap_err("site config failed check:")?;
 		self.resource_builders.clear();
 		for (prefix, config) in &self.site.config.resources {
 			self.resource_builders
@@ -152,6 +173,10 @@ impl SiteBuilder {
 					}),
 					element!("head", |el| {
 						el.prepend(r#"<meta charset="utf-8">"#, ContentType::Html);
+						el.append(
+							r#"<script type="text/javascript" src="/webdog/webdog.js" defer></script>"#,
+							ContentType::Html,
+						);
 						if self.serving {
 							el.append(r#"<script src="/_dev.js"></script>"#, ContentType::Html);
 						}
@@ -306,7 +331,47 @@ impl SiteBuilder {
 			.with_context(|| format!("Failed to read page at {}", page_path.display()))?;
 		let page = crate::frontmatter::FrontMatter::parse(input)?;
 
-		let parser = Parser::new_ext(&page.content, Options::all());
+		let mut language = None;
+		let parser = Parser::new_ext(&page.content, Options::all()).filter_map(|event| {
+			// syntax highlighting for code blocks
+			match event {
+				pulldown_cmark::Event::Start(pulldown_cmark::Tag::CodeBlock(
+					pulldown_cmark::CodeBlockKind::Fenced(name),
+				)) => {
+					language = Some(name);
+					None
+				}
+				pulldown_cmark::Event::Text(code) => {
+					if let Some(language) = language.take() {
+						let syntax_reference = self
+							.syntax_set
+							.find_syntax_by_token(&language)
+							.unwrap_or_else(|| self.syntax_set.find_syntax_plain_text());
+						let html = format!(
+							r#"<div class="wd-codeblock">
+								<button class="copy">Copy</button>
+								{}
+							</div>"#,
+							syntect::html::highlighted_html_for_string(
+								&code,
+								&self.syntax_set,
+								syntax_reference,
+								self.theme_set
+									.themes
+									.get(&self.site.config.code_theme)
+									.as_ref()
+									.expect("should never fail"),
+							)
+							.expect("failed to highlight syntax")
+						);
+						Some(pulldown_cmark::Event::Html(html.into()))
+					} else {
+						Some(pulldown_cmark::Event::Text(code))
+					}
+				}
+				_ => Some(event),
+			}
+		});
 		let mut page_html = String::new();
 		pulldown_cmark::html::push_html(&mut page_html, parser);
 

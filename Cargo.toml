@@ -23,6 +23,7 @@ rayon = "1"
 rss = {version = "2", features = ["validation"]}
 serde = {version = "1", features = ["derive"]}
 serde_yml = "0.0.12"
+syntect = "5"
 tera = "1"
 time = {version = "0.3", features = ["serde-human-readable"]}
 tokio = {version = "1.10", features = [

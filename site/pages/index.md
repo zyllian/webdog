@@ -10,7 +10,7 @@ extra:
 
 welcome to webdog, the static site generator fit for a dog :3
 
-```
+```sh
 git clone https://zyllian/webdog
 cd webdog
 cargo install .

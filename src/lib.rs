@@ -43,6 +43,12 @@ pub struct SiteConfig {
 	pub sass_styles: Vec<PathBuf>,
 	/// URL to the CDN used for the site's images.
 	pub cdn_url: Url,
+	/// The theme to use for the site's code blocks.
+	/// TODO: dark/light themes
+	/// TODO: export themes as CSS instead of styling HTML directly
+	/// TODO: allow loading user themes
+	pub code_theme: String,
+
 	/// List of resources the site should build.
 	pub resources: HashMap<String, ResourceBuilderConfig>,
 }
@@ -51,6 +57,17 @@ impl SiteConfig {
 	/// Gets a CDN url from the given file name.
 	pub fn cdn_url(&self, file: &str) -> eyre::Result<Url> {
 		Ok(self.cdn_url.join(file)?)
+	}
+
+	/// Checks the site config for errors.
+	pub fn check(&self, builder: &SiteBuilder) -> eyre::Result<()> {
+		builder
+			.theme_set
+			.themes
+			.contains_key(&self.code_theme)
+			.then_some(())
+			.ok_or_else(|| eyre::eyre!("missing code theme: {}", self.code_theme))?;
+		Ok(())
 	}
 }
 

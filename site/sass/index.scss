@@ -166,3 +166,17 @@ abbr {
 .flex-spacer {
   flex-grow: 1;
 }
+
+.wd-codeblock {
+  position: relative;
+
+  .copy {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  & > pre {
+    padding: 8px;
+  }
+}
