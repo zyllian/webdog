@@ -238,7 +238,7 @@ impl Site {
 							}
 						}
 					}
-					Err(e) => eprintln!("Failed to update: {}", e),
+					Err(e) => eprintln!("Failed to update: {:?}", e),
 				}
 			})
 			.expect("Failed to watch file");
