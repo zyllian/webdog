@@ -16,7 +16,7 @@ where
 	/// Parses the given input for front matter.
 	pub fn parse(input: String) -> eyre::Result<Self> {
 		if input.starts_with("---\n") {
-			if let Some((frontmatter, content)) = input[3..].split_once("---\n") {
+			if let Some((frontmatter, content)) = input[3..].split_once("\n---\n") {
 				let data = serde_yml::from_str(frontmatter)?;
 				return Ok(Self {
 					content: content.to_string(),
