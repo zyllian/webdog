@@ -54,7 +54,7 @@ pub struct SiteBuilder {
 
 impl SiteBuilder {
 	/// Creates a new site builder.
-	pub fn new(site: Site, serving: bool) -> Self {
+	pub fn new(site: Site, serving: bool) -> eyre::Result<Self> {
 		let mut build_path = match &site.config.build {
 			Some(build) => site.site_path.join(build),
 			_ => site.site_path.join("build"),
@@ -68,11 +68,10 @@ impl SiteBuilder {
 				.join(format!("{}/**/*.tera", crate::TEMPLATES_PATH))
 				.to_str()
 				.expect("failed to convert path to string"),
-		)
-		.expect("failed to create tera instance");
+		)?;
 		tera.autoescape_on(vec![".tera"]);
 
-		Self {
+		Ok(Self {
 			tera,
 			syntax_set: SyntaxSet::load_defaults_newlines(),
 			theme_set: ThemeSet::load_defaults(),
@@ -80,7 +79,7 @@ impl SiteBuilder {
 			site,
 			build_path,
 			serving,
-		}
+		})
 	}
 
 	/// Prepares the site builder for use and sets up the build directory.

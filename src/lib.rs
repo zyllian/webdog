@@ -159,7 +159,7 @@ impl Site {
 
 	/// Builds the site once.
 	pub fn build_once(self) -> eyre::Result<()> {
-		let builder = SiteBuilder::new(self, false).prepare()?;
+		let builder = SiteBuilder::new(self, false)?.prepare()?;
 
 		builder.site.build_all_pages(&builder)?;
 		builder.build_sass()?;

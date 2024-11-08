@@ -150,7 +150,7 @@ impl Site {
 	pub async fn serve(self) -> eyre::Result<()> {
 		let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
 
-		let mut builder = SiteBuilder::new(self, true).prepare()?;
+		let mut builder = SiteBuilder::new(self, true)?.prepare()?;
 		let site = &builder.site;
 		let build_path = builder.build_path.clone();
 
