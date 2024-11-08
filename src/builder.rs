@@ -35,7 +35,7 @@ struct TemplateData<'a, T> {
 
 /// Struct used to build the site.
 pub struct SiteBuilder {
-	/// The Handlebars registry used to render templates.
+	/// The Tera registry used to render templates.
 	pub(crate) tera: Tera,
 	/// The syntax set used to render source code.
 	pub(crate) syntax_set: SyntaxSet,
