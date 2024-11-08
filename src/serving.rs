@@ -114,9 +114,7 @@ fn remove(builder: &mut SiteBuilder, path: &Path, relative_path: &Path) -> eyre:
 		builder.site.page_index.remove(&page_name_str);
 		std::fs::remove_file(builder.build_path.join(page_name.with_extension("html")))
 			.with_context(|| format!("Failed to remove page at {:?}", path))?;
-	} else if let Ok(template_path) = relative_path.strip_prefix(TEMPLATES_PATH) {
-		let (_template_name, template_name_str) = get_name(template_path);
-		builder.site.template_index.remove(&template_name_str);
+	} else if let Ok(_template_path) = relative_path.strip_prefix(TEMPLATES_PATH) {
 		builder.tera.full_reload()?;
 		builder
 			.site

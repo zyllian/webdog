@@ -18,7 +18,6 @@ use rayon::prelude::*;
 use resource::{EmbedMetadata, ResourceBuilderConfig};
 use serde::Deserialize;
 use url::Url;
-use util::get_name;
 use walkdir::WalkDir;
 
 use builder::SiteBuilder;
@@ -103,8 +102,6 @@ pub struct Site {
 	pub site_path: PathBuf,
 	/// The site's configuration.
 	pub config: SiteConfig,
-	/// An index of available templates.
-	pub template_index: HashMap<String, PathBuf>,
 	/// An index of available pages.
 	pub page_index: HashMap<String, PathBuf>,
 }
@@ -117,23 +114,6 @@ impl Site {
 				.wrap_err("Failed to read site config")?,
 		)
 		.wrap_err("Failed to parse site config")?;
-
-		let mut template_index = HashMap::new();
-		let templates_path = site_path.join(TEMPLATES_PATH);
-		for entry in WalkDir::new(&templates_path).into_iter() {
-			let entry = entry.wrap_err("Failed to read template entry")?;
-			let path = entry.path();
-
-			if let Some(ext) = path.extension() {
-				if ext == "hbs" && entry.file_type().is_file() {
-					let (_, name) = get_name(
-						path.strip_prefix(&templates_path)
-							.wrap_err("This really shouldn't have happened")?,
-					);
-					template_index.insert(name, path.to_owned());
-				}
-			}
-		}
 
 		let mut page_index = HashMap::new();
 		let pages_path = site_path.join(PAGES_PATH);
@@ -158,7 +138,6 @@ impl Site {
 		Ok(Self {
 			site_path: site_path.to_owned(),
 			config,
-			template_index,
 			page_index,
 		})
 	}
