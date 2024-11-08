@@ -53,6 +53,21 @@ pub struct SiteConfig {
 }
 
 impl SiteConfig {
+	/// Creates a new site config from the given title.
+	pub fn new(title: String) -> Self {
+		let url: Url = "/".parse().expect("should never fail");
+		Self {
+			base_url: url.clone(),
+			title,
+			description: Default::default(),
+			build: None,
+			sass_styles: vec!["index.scss".into()],
+			cdn_url: url,
+			code_theme: "base16-ocean.dark".to_string(),
+			resources: Default::default(),
+		}
+	}
+
 	/// Gets a CDN url from the given file name.
 	pub fn cdn_url(&self, file: &str) -> eyre::Result<Url> {
 		Ok(self.cdn_url.join(file)?)
