@@ -65,7 +65,7 @@ impl SiteBuilder {
 
 		let mut tera = Tera::new(
 			site.site_path
-				.join("templates/**/*.tera")
+				.join(format!("{}/**/*.tera", crate::TEMPLATES_PATH))
 				.to_str()
 				.expect("failed to convert path to string"),
 		)

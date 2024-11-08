@@ -19,9 +19,18 @@ use warp::{
 };
 
 use crate::{
-	resource::RESOURCES_PATH, util::get_name, Site, SiteBuilder, PAGES_PATH, ROOT_PATH, SASS_PATH,
-	TEMPLATES_PATH,
+	resource::RESOURCES_PATH, Site, SiteBuilder, PAGES_PATH, ROOT_PATH, SASS_PATH, TEMPLATES_PATH,
 };
+
+/// Helper to get the "name" of a path.
+fn get_name(path: &Path) -> (PathBuf, String) {
+	let name = path.with_extension("");
+	let name_str = name
+		.display()
+		.to_string()
+		.replace(std::path::MAIN_SEPARATOR, "/");
+	(name, name_str)
+}
 
 fn with_build_path(
 	build_path: PathBuf,
