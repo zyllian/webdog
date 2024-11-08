@@ -35,7 +35,7 @@ async fn main() -> eyre::Result<()> {
 		Mode::Build => {
 			build(site)?;
 		}
-		Mode::Serve => site.serve().await?,
+		Mode::Serve => site.serve("127.0.0.1:8080").await?,
 		Mode::Now => {
 			let time = OffsetDateTime::now_utc();
 			println!(

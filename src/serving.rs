@@ -147,8 +147,8 @@ fn skip_path(builder: &SiteBuilder, path: &Path) -> bool {
 
 impl Site {
 	/// Serves the site for development. Don't use this in production.
-	pub async fn serve(self) -> eyre::Result<()> {
-		let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+	pub async fn serve(self, addr: &str) -> eyre::Result<()> {
+		let addr: SocketAddr = addr.parse()?;
 
 		let mut builder = SiteBuilder::new(self, true)?.prepare()?;
 		let site = &builder.site;
