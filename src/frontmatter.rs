@@ -1,4 +1,4 @@
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 
 /// Very basic YAML front matter parser.
 #[derive(Debug)]
@@ -28,5 +28,29 @@ where
 			content: input,
 			data: None,
 		})
+	}
+}
+
+impl<T> FrontMatter<T>
+where
+	T: Serialize,
+{
+	/// Formats the front matter and content to a string ready for saving.
+	pub fn format(&self) -> eyre::Result<String> {
+		let mut output = String::new();
+
+		if let Some(data) = &self.data {
+			output.push_str("---\n");
+			output.push_str(&serde_yml::to_string(data)?);
+			output.push_str("---\n\n");
+		}
+
+		output.push_str(&self.content);
+
+		if !output.ends_with('\n') {
+			output.push('\n');
+		}
+
+		Ok(output)
 	}
 }
