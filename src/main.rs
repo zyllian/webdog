@@ -91,8 +91,7 @@ enum ResourceCommands {
 	},
 }
 
-#[tokio::main]
-async fn main() -> eyre::Result<()> {
+fn main() -> eyre::Result<()> {
 	#[cfg(feature = "color-eyre")]
 	color_eyre::install()?;
 
@@ -136,7 +135,8 @@ async fn main() -> eyre::Result<()> {
 		#[cfg(feature = "serve")]
 		Commands::Serve { ip, port } => {
 			let site = site()?;
-			site.serve(&format!("{}:{}", ip, port)).await
+			let rt = tokio::runtime::Runtime::new()?;
+			rt.block_on(async move { site.serve(&format!("{}:{}", ip, port)).await })
 		}
 		Commands::Now => {
 			let time = OffsetDateTime::now_utc();
