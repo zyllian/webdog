@@ -165,9 +165,10 @@ impl SiteBuilder {
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
 				element_content_handlers: vec![
-					#[cfg(debug_assertions)]
 					element!("body", |el| {
-						el.set_attribute("class", "debug")?;
+						if self.serving {
+							el.set_attribute("class", "debug")?;
+						}
 						Ok(())
 					}),
 					element!("head", |el| {
