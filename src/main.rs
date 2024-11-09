@@ -260,6 +260,7 @@ fn main() -> eyre::Result<()> {
 						..Default::default()
 					}),
 				};
+				std::fs::create_dir_all(page_path.parent().expect("should never fail"))?;
 				std::fs::write(&page_path, fm.format()?)?;
 
 				println!("Page created! Edit at {:?}.", page_path);
