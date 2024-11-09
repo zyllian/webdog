@@ -2,7 +2,7 @@ base_url: "https://webdog.zyl.gay"
 title: webdog
 description: "static site builder for dogs"
 sass_styles: [index.scss]
-cdn_url: "https://i.zyl.gay"
+cdn_url: "https://i.zyl.gay/webdog"
 code_theme: base16-ocean.dark # options: base16-ocean.dark, base16-eighties.dark, base16-mocha.dark, base16-ocean.light, InspiredGitHub, Solarized (dark), and Solarized (light)
 
 resources:
