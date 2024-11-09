@@ -6,5 +6,6 @@
     copyButton.addEventListener("click", async () => {
       await navigator.clipboard.writeText(source);
     });
+    copyButton.style.display = "inline-block";
   }
 })();
