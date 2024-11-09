@@ -1,11 +1,14 @@
-use serde::{de::DeserializeOwned, Serialize};
+use std::ops::Deref;
+
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// Very basic YAML front matter parser.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FrontMatter<T> {
 	/// The content past the front matter.
 	pub content: String,
 	/// The front matter found, if any.
+	#[serde(flatten)]
 	pub data: Option<T>,
 }
 
@@ -52,5 +55,48 @@ where
 		}
 
 		Ok(output)
+	}
+}
+
+/// Wrapper around `FrontMatter` to only function when the data is present.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FrontMatterRequired<T>(FrontMatter<T>);
+
+impl<T> FrontMatterRequired<T> {
+	/// Gets a reference to the front matter's data.
+	pub fn data(&self) -> &T {
+		self.0.data.as_ref().expect("missing front matter data")
+	}
+
+	/// Gets a mutable reference to the front matter's data.
+	pub fn data_mut(&mut self) -> &mut T {
+		self.0.data.as_mut().expect("missing front matter data")
+	}
+
+	/// Gets a mutable reference to the front matter's content.
+	pub fn content_mut(&mut self) -> &mut String {
+		&mut self.0.content
+	}
+}
+
+impl<T> FrontMatterRequired<T>
+where
+	T: DeserializeOwned,
+{
+	/// Parses the given input for front matter, failing if missing.
+	pub fn parse(input: String) -> eyre::Result<Self> {
+		let fm = FrontMatter::parse(input)?;
+		if fm.data.is_none() {
+			eyre::bail!("missing frontmatter!");
+		}
+		Ok(Self(fm))
+	}
+}
+
+impl<T> Deref for FrontMatterRequired<T> {
+	type Target = FrontMatter<T>;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
 	}
 }

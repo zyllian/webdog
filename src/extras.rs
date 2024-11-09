@@ -104,7 +104,7 @@ fn resource_list_outside(
 				.map(|(id, v)| ResourceTemplateData {
 					resource: v,
 					id: id.clone(),
-					timestamp: v.timestamp,
+					timestamp: v.data().timestamp,
 				})
 				.collect(),
 		})?,

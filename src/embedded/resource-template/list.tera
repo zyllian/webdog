@@ -1,0 +1,23 @@
+{% extends "base.tera" %}
+{% block content %}
+{% if tag %}
+<h1>!!RESOURCE_NAME_PLURAL!! tagged {{ tag }}</h1>
+<p><a href="/!!RESOURCE_TYPE!!/">View all !!RESOURCE_NAME_PLURAL_LOWERCASE!!</a></p>
+{% else %}
+<h1>!!RESOURCE_NAME_PLURAL!!</h1>
+<p><a href="tags">view !!RESOURCE_NAME!! tags</a></p>
+<p><a href="rss.xml">rss feed</a></p>
+{% endif %}
+<h1>Page {{ page }}/{{ page_max }}</h1>
+{% if previous %}
+<a href="./{{previous}}">previous page</a>
+{% endif %}
+{% if next %}
+<a href="./{{next}}">next page</a>
+{% endif %}
+<div>
+	{% for resource in resources %}
+	<p><a href="/!!RESOURCE_TYPE!!/{{resource.id}}">{{ resource.title }}</a></p>
+	{% endfor %}
+</div>
+{% endblock content %}

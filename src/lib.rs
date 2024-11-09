@@ -1,8 +1,8 @@
 mod builder;
 mod extras;
-mod frontmatter;
+pub mod frontmatter;
 mod link_list;
-mod resource;
+pub mod resource;
 #[cfg(feature = "serve")]
 pub mod serving;
 mod util;
@@ -16,19 +16,25 @@ use extras::ExtraData;
 use eyre::Context;
 use rayon::prelude::*;
 use resource::{EmbedMetadata, ResourceBuilderConfig};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use url::Url;
 use walkdir::WalkDir;
 
 use builder::SiteBuilder;
 
-const PAGES_PATH: &str = "pages";
-const TEMPLATES_PATH: &str = "templates";
-const SASS_PATH: &str = "sass";
-const ROOT_PATH: &str = "root";
+/// Source base path for normal site pages.
+pub const PAGES_PATH: &str = "pages";
+/// Source base path for site templates.
+pub const TEMPLATES_PATH: &str = "templates";
+/// Source base path for SASS stylesheets.
+pub const SASS_PATH: &str = "sass";
+/// Source base path for files which will be copied to the site root.
+pub const ROOT_PATH: &str = "root";
+/// Source base path for resources.
+pub const RESOURCES_PATH: &str = "resources";
 
 /// Struct for the site's configuration.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SiteConfig {
 	/// The location the site is at.
 	pub base_url: Url,
@@ -53,16 +59,18 @@ pub struct SiteConfig {
 }
 
 impl SiteConfig {
+	/// The filename for site config files.
+	pub const FILENAME: &str = "config.yaml";
+
 	/// Creates a new site config from the given title.
-	pub fn new(title: String) -> Self {
-		let url: Url = "/".parse().expect("should never fail");
+	pub fn new(base_url: Url, cdn_url: Url, title: String) -> Self {
 		Self {
-			base_url: url.clone(),
+			base_url,
 			title,
 			description: Default::default(),
 			build: None,
 			sass_styles: vec!["index.scss".into()],
-			cdn_url: url,
+			cdn_url,
 			code_theme: "base16-ocean.dark".to_string(),
 			resources: Default::default(),
 		}
@@ -82,6 +90,15 @@ impl SiteConfig {
 			.then_some(())
 			.ok_or_else(|| eyre::eyre!("missing code theme: {}", self.code_theme))?;
 		Ok(())
+	}
+
+	/// Helper to read the site config from the given path.
+	pub fn read(site_path: &Path) -> eyre::Result<Self> {
+		let config_path = site_path.join(SiteConfig::FILENAME);
+		if !config_path.exists() {
+			eyre::bail!("no site config found!");
+		}
+		Ok(serde_yml::from_str(&std::fs::read_to_string(config_path)?)?)
 	}
 }
 
@@ -124,11 +141,7 @@ pub struct Site {
 impl Site {
 	/// Creates a new site from the given path.
 	pub fn new(site_path: &Path) -> eyre::Result<Self> {
-		let config: SiteConfig = serde_yml::from_str(
-			&std::fs::read_to_string(site_path.join("config.yaml"))
-				.wrap_err("Failed to read site config")?,
-		)
-		.wrap_err("Failed to parse site config")?;
+		let config = SiteConfig::read(site_path)?;
 
 		let mut page_index = HashMap::new();
 		let pages_path = site_path.join(PAGES_PATH);

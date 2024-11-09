@@ -10,10 +10,9 @@ use rss::{validation::Validate, ChannelBuilder, ItemBuilder};
 use serde::{Deserialize, Serialize, Serializer};
 use time::{format_description::well_known::Rfc2822, OffsetDateTime};
 
-use crate::{builder::SiteBuilder, frontmatter::FrontMatter, link_list::Link, PageMetadata};
-
-/// Source base path for resources.
-pub const RESOURCES_PATH: &str = "resources";
+use crate::{
+	builder::SiteBuilder, frontmatter::FrontMatterRequired, link_list::Link, PageMetadata,
+};
 
 /// Metadata for resources.
 #[derive(Debug, Deserialize, Serialize)]
@@ -35,16 +34,13 @@ pub struct ResourceMetadata {
 	/// Whether the resource is a draft. Drafts can be committed without being published to the live site.
 	#[serde(default)]
 	pub draft: bool,
-	/// The resource's content. Defaults to nothing until loaded in another step.
-	#[serde(default)]
-	pub content: String,
 }
 
 #[derive(Debug, Serialize)]
 pub struct ResourceTemplateData<'r> {
 	/// The resource's metadata.
 	#[serde(flatten)]
-	pub resource: &'r ResourceMetadata,
+	pub resource: &'r FrontMatterRequired<ResourceMetadata>,
 	/// The resource's ID.
 	pub id: String,
 	/// The resource's timestamp. Duplicated to change serialization method.
@@ -129,7 +125,7 @@ struct ResourceListTemplateData<'r> {
 }
 
 /// Config for the resource builder.
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ResourceBuilderConfig {
 	/// Path to where the resources should be loaded from.
 	pub source_path: String,
@@ -165,7 +161,7 @@ pub struct ResourceBuilder {
 	/// The builder's config.
 	pub config: ResourceBuilderConfig,
 	/// The currently loaded resource metadata.
-	pub loaded_metadata: Vec<(String, ResourceMetadata)>,
+	pub loaded_metadata: Vec<(String, FrontMatterRequired<ResourceMetadata>)>,
 }
 
 impl ResourceBuilder {
@@ -187,26 +183,27 @@ impl ResourceBuilder {
 	}
 
 	/// Loads resource metadata from the given path.
-	fn load(builder: &SiteBuilder, path: &Path) -> eyre::Result<(String, ResourceMetadata)> {
+	fn load(
+		builder: &SiteBuilder,
+		path: &Path,
+	) -> eyre::Result<(String, FrontMatterRequired<ResourceMetadata>)> {
 		let id = Self::get_id(path);
 
 		let input = std::fs::read_to_string(path)?;
-		let page = FrontMatter::<ResourceMetadata>::parse(input)
+		let mut page = FrontMatterRequired::<ResourceMetadata>::parse(input)
 			.wrap_err_with(|| eyre::eyre!("Failed to parse resource front matter"))?;
 
 		let parser = Parser::new_ext(&page.content, Options::all());
 		let mut html = String::new();
 		pulldown_cmark::html::push_html(&mut html, parser);
+		*page.content_mut() = html;
 
-		let mut data = page
-			.data
-			.ok_or_else(|| eyre::eyre!("missing front matter for file at {path:?}"))?;
-		data.content = html;
-		if let Some(cdn_file) = data.cdn_file {
-			data.cdn_file = Some(builder.site.config.cdn_url(&cdn_file)?.to_string());
+		let data = page.data_mut();
+		if let Some(cdn_file) = &data.cdn_file {
+			data.cdn_file = Some(builder.site.config.cdn_url(cdn_file)?.to_string());
 		}
 
-		Ok((id, data))
+		Ok((id, page))
 	}
 
 	/// Loads all resource metadata from the given config.
@@ -216,20 +213,26 @@ impl ResourceBuilder {
 		for e in builder
 			.site
 			.site_path
-			.join(RESOURCES_PATH)
+			.join(crate::RESOURCES_PATH)
 			.join(&self.config.source_path)
 			.read_dir()?
 		{
 			let p = e?.path();
 			if let Some("md") = p.extension().and_then(|e| e.to_str()) {
 				let (id, metadata) = Self::load(builder, &p)?;
-				if cfg!(not(debug_assertions)) && metadata.draft {
+				if !builder.serving && metadata.data.as_ref().expect("should never fail").draft {
 					continue;
 				}
 				lmd.push((id, metadata));
 			}
 		}
-		lmd.sort_by(|a, b| b.1.timestamp.cmp(&a.1.timestamp));
+		lmd.sort_by(|a, b| {
+			b.1.data
+				.as_ref()
+				.expect("should never fail")
+				.timestamp
+				.cmp(&a.1.data.as_ref().expect("should never fail").timestamp)
+		});
 		Ok(())
 	}
 
@@ -246,19 +249,20 @@ impl ResourceBuilder {
 		&self,
 		builder: &SiteBuilder,
 		id: String,
-		resource: &ResourceMetadata,
+		resource: &FrontMatterRequired<ResourceMetadata>,
 	) -> eyre::Result<()> {
 		let out_path = self.build_path(&builder.build_path, &id);
 
+		let data = resource.data();
 		let out = builder.build_page_raw(
 			PageMetadata {
 				template: Some(self.config.resource_template.clone()),
-				title: Some(resource.title.clone()),
+				title: Some(data.title.clone()),
 				embed: Some(EmbedMetadata {
-					title: resource.title.clone(),
+					title: data.title.clone(),
 					site_name: builder.site.config.title.clone(),
-					description: resource.desc.clone(),
-					image: if let Some(cdn_file) = &resource.cdn_file {
+					description: data.desc.clone(),
+					image: if let Some(cdn_file) = &data.cdn_file {
 						Some(builder.site.config.cdn_url(cdn_file)?.to_string())
 					} else {
 						None
@@ -273,7 +277,7 @@ impl ResourceBuilder {
 			ResourceTemplateData {
 				resource,
 				id,
-				timestamp: resource.timestamp,
+				timestamp: resource.data.as_ref().expect("should never fail").timestamp,
 			},
 		)?;
 		std::fs::write(out_path, out)?;
@@ -303,7 +307,7 @@ impl ResourceBuilder {
 			data.push(ResourceTemplateData {
 				resource,
 				id: id.clone(),
-				timestamp: resource.timestamp,
+				timestamp: resource.data().timestamp,
 			});
 		}
 
@@ -368,7 +372,7 @@ impl ResourceBuilder {
 		// Build resource lists by tag
 		let mut tags: BTreeMap<String, Vec<&ResourceTemplateData>> = BTreeMap::new();
 		for resource in &data {
-			for tag in resource.resource.tags.iter().cloned() {
+			for tag in resource.resource.data().tags.iter().cloned() {
 				tags.entry(tag).or_default().push(resource);
 			}
 		}
@@ -416,7 +420,7 @@ impl ResourceBuilder {
 		for resource in data {
 			items.push(
 				ItemBuilder::default()
-					.title(Some(resource.resource.title.to_owned()))
+					.title(Some(resource.resource.data().title.to_owned()))
 					.link(Some(
 						builder
 							.site
@@ -428,7 +432,7 @@ impl ResourceBuilder {
 							))?
 							.to_string(),
 					))
-					.description(resource.resource.desc.clone())
+					.description(resource.resource.data().desc.clone())
 					.pub_date(Some(resource.timestamp.format(&Rfc2822)?))
 					.content(Some(builder.tera.render(
 						&self.config.rss_template,

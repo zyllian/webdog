@@ -1,0 +1,21 @@
+{% extends "base.tera" %}
+{% block content %}
+<div>
+	<h1>{{ title }}</h1>
+	<span>published {{ timestamp }}</span>
+	{% if draft %}
+	<h2>DRAFT</h2>
+	{% endif %}
+	<p>{{ desc }}</p>
+	<div>
+		{{ content | safe }}
+	</div>
+	<hr />
+	<h3>tags</h3>
+	<div>
+		{% for tag in tags %}
+		<a href="/!!RESOURCE_TYPE!!/tag/{{tag}}">{{ tag }}</a>{% if not loop.last %},{% endif %}
+		{% endfor %}
+	</div>
+</div>
+{% endblock content %}

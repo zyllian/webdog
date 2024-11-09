@@ -4,6 +4,7 @@ name = "webdog"
 version = "0.1.0"
 
 [dependencies]
+clap = { version = "4", features = ["derive"] }
 color-eyre = {version = "0.6", optional = true}
 extract-frontmatter = "4"
 eyre = "0.6"
@@ -11,6 +12,7 @@ fs_extra = "1.2"
 futures = {version = "0.3", optional = true}
 grass = {version = "0.13", default-features = false}
 hotwatch = {version = "0.5", optional = true}
+include_dir = "0.7"
 itertools = "0.13"
 lol_html = "2"
 minifier = {version = "0.3", features = ["html"]}

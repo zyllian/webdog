@@ -46,7 +46,7 @@ pub struct SiteBuilder {
 	/// The path to the build directory.
 	pub build_path: PathBuf,
 	/// Whether the site is going to be served locally with the dev server.
-	serving: bool,
+	pub serving: bool,
 
 	/// The resource builders available to the builder.
 	pub resource_builders: HashMap<String, ResourceBuilder>,
@@ -105,7 +105,7 @@ impl SiteBuilder {
 		std::fs::create_dir(&webdog_path)?;
 		std::fs::write(
 			webdog_path.join("webdog.js"),
-			include_str!("./js/webdog.js"),
+			include_str!("./embedded/js/webdog.js"),
 		)?;
 
 		let root_path = self.site.site_path.join(ROOT_PATH);

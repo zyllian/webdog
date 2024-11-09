@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="referrer" content="no-referrer">
+	<link rel="stylesheet" href="/styles/index.css">
+
+	<title>{{ title }}</title>
+	{# header information from webdog #}
+	{{ head | safe }}
+	{# include scripts defined in the page frontmatter #}
+	{% for script in scripts %}
+	<script type="text/javascript" src="{{script}}" defer></script>
+	{% endfor %}
+	{# include styles defined in the page frontmatter #}
+	{% for style in styles %}
+	<link rel="stylesheet" href="/styles/{{style}}">
+	{% endfor %}
+</head>
+
+<body>
+	<h1><a href="/">webdog site</a></h1>
+	<main class="page">
+		{% block content %}{{ page | safe }}{% endblock content %}
+	</main>
+</body>
+
+</html>

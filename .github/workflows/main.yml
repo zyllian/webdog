@@ -40,7 +40,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Build site
         run: |
-          cargo run --no-default-features --release
+          cargo run --no-default-features --release -- build --site-path site
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

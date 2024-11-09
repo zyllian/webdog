@@ -19,7 +19,7 @@ use warp::{
 };
 
 use crate::{
-	resource::RESOURCES_PATH, Site, SiteBuilder, PAGES_PATH, ROOT_PATH, SASS_PATH, TEMPLATES_PATH,
+	Site, SiteBuilder, SiteConfig, PAGES_PATH, RESOURCES_PATH, ROOT_PATH, SASS_PATH, TEMPLATES_PATH,
 };
 
 /// Helper to get the "name" of a path.
@@ -94,7 +94,7 @@ fn create(
 			builder.site.build_all_pages(builder)?;
 			builder.build_all_resources()?;
 		}
-	} else if relative_path.display().to_string() == "config.yaml" {
+	} else if relative_path.display().to_string() == SiteConfig::FILENAME {
 		let new_config = serde_yml::from_str(&std::fs::read_to_string(path)?)?;
 		builder.site.config = new_config;
 		builder.reload()?;
@@ -277,8 +277,9 @@ impl Site {
 							.expect("Failed to decode URL");
 
 						if p == "_dev.js" {
-							let res =
-								Response::new(include_str!("./js/refresh_websocket.js").into());
+							let res = Response::new(
+								include_str!("./embedded/js/refresh_websocket.js").into(),
+							);
 							return Ok(res);
 						}
 
