@@ -24,7 +24,7 @@ struct Cli {
 
 	/// The path to the site.
 	#[arg(global = true, long, default_value = ".")]
-	site_path: PathBuf,
+	site: PathBuf,
 }
 
 #[derive(Debug, Subcommand)]
@@ -116,7 +116,7 @@ fn main() -> eyre::Result<()> {
 
 	let cli = Cli::parse();
 
-	let site = || -> eyre::Result<Site> { Site::new(&Path::new(&cli.site_path).canonicalize()?) };
+	let site = || -> eyre::Result<Site> { Site::new(&Path::new(&cli.site).canonicalize()?) };
 
 	match cli.command {
 		Commands::Create {
@@ -124,22 +124,22 @@ fn main() -> eyre::Result<()> {
 			cdn_url,
 			title,
 		} => {
-			if cli.site_path.exists() {
+			if cli.site.exists() {
 				eprintln!("content exists in the given path! canceling!");
 				return Ok(());
 			}
-			std::fs::create_dir_all(&cli.site_path)?;
+			std::fs::create_dir_all(&cli.site)?;
 			let config = SiteConfig::new(base_url.clone(), cdn_url.unwrap_or(base_url), title);
 			std::fs::write(
-				cli.site_path.join(SiteConfig::FILENAME),
+				cli.site.join(SiteConfig::FILENAME),
 				serde_yml::to_string(&config)?,
 			)?;
-			DEFAULT_PROJECT.extract(&cli.site_path)?;
-			std::fs::create_dir(cli.site_path.join(webdog::ROOT_PATH))?;
+			DEFAULT_PROJECT.extract(&cli.site)?;
+			std::fs::create_dir(cli.site.join(webdog::ROOT_PATH))?;
 
 			println!(
 				"Base site created at {:?}! Ready for editing, woof!",
-				cli.site_path
+				cli.site
 			);
 
 			Ok(())
@@ -164,14 +164,14 @@ fn main() -> eyre::Result<()> {
 		}
 		Commands::Resource { command } => match command {
 			ResourceCommands::Create { id, name, plural } => {
-				let config_path = cli.site_path.join(SiteConfig::FILENAME);
-				let mut config = SiteConfig::read(&cli.site_path)?;
+				let config_path = cli.site.join(SiteConfig::FILENAME);
+				let mut config = SiteConfig::read(&cli.site)?;
 				if config.resources.contains_key(&id) {
 					eprintln!("resource type {id} already exists, canceling");
 					return Ok(());
 				}
 
-				let resource_template_path = cli.site_path.join(webdog::TEMPLATES_PATH).join(&id);
+				let resource_template_path = cli.site.join(webdog::TEMPLATES_PATH).join(&id);
 				if resource_template_path.exists() {
 					eprintln!(
 						"path for resource already exists at {resource_template_path:?}, canceling"
@@ -216,7 +216,7 @@ fn main() -> eyre::Result<()> {
 
 				std::fs::write(config_path, serde_yml::to_string(&config)?)?;
 
-				let resource_path = cli.site_path.join(webdog::RESOURCES_PATH).join(&id);
+				let resource_path = cli.site.join(webdog::RESOURCES_PATH).join(&id);
 				std::fs::create_dir_all(&resource_path)?;
 
 				create_resource(
@@ -244,7 +244,7 @@ fn main() -> eyre::Result<()> {
 				template,
 			} => {
 				let page_path = cli
-					.site_path
+					.site
 					.join(webdog::PAGES_PATH)
 					.join(&id)
 					.with_extension("md");
@@ -276,10 +276,10 @@ fn main() -> eyre::Result<()> {
 			description,
 			skip_draft,
 		} => {
-			let config = SiteConfig::read(&cli.site_path)?;
+			let config = SiteConfig::read(&cli.site)?;
 			if let Some(resource) = config.resources.get(&resource_type) {
 				let resource_path = cli
-					.site_path
+					.site
 					.join(webdog::RESOURCES_PATH)
 					.join(&resource.source_path)
 					.join(&id)
