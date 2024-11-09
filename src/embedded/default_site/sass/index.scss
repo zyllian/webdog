@@ -2,3 +2,31 @@
   background-color: #bbb;
   padding: 8px;
 }
+
+.wd-codeblock {
+  position: relative;
+
+  .copy {
+    opacity: 0;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transition: opacity linear 0.1s;
+
+    &:focus {
+      transition: none;
+      opacity: 1;
+    }
+  }
+
+  &:hover .copy,
+  &:focus .copy {
+    opacity: 1;
+  }
+
+  & > pre {
+    padding: 8px;
+    overflow: scroll;
+  }
+}
