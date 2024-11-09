@@ -64,7 +64,7 @@ impl<'r> ResourceTemplateData<'r> {
 }
 
 /// struct for adding custom meta content embeds
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct EmbedMetadata {
 	pub title: String,
 	#[serde(default)]

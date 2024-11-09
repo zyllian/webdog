@@ -107,7 +107,7 @@ impl SiteConfig {
 pub struct TemplateMetadata {}
 
 /// Struct for the front matter in pages.
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PageMetadata {
 	/// The page's title.
 	pub title: Option<String>,

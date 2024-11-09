@@ -7,7 +7,7 @@ use url::Url;
 use webdog::{
 	frontmatter::FrontMatter,
 	resource::{ResourceBuilderConfig, ResourceMetadata},
-	Site, SiteConfig,
+	PageMetadata, Site, SiteConfig,
 };
 
 /// The default project to use when creating a new one, embedded into the binary.
@@ -58,6 +58,11 @@ enum Commands {
 		#[clap(subcommand)]
 		command: ResourceCommands,
 	},
+	/// For dealing with standard site pages.
+	Page {
+		#[clap(subcommand)]
+		command: PageCommands,
+	},
 	/// Creates a new resource of the given type.
 	New {
 		/// The type of resource to create.
@@ -88,6 +93,20 @@ enum ResourceCommands {
 		name: String,
 		/// The name of the resource type, but plural.
 		plural: String,
+	},
+}
+
+#[derive(Debug, Subcommand)]
+enum PageCommands {
+	/// Creates a new standard page.
+	New {
+		/// The page's ID.
+		id: String,
+		/// The page's title.
+		title: Option<String>,
+		/// The page's base template if using one other than the default.
+		#[arg(long)]
+		template: Option<String>,
 	},
 }
 
@@ -214,6 +233,36 @@ fn main() -> eyre::Result<()> {
 				)?;
 
 				println!("Created the new resource type {id}! The first resource of this time is available at {:?}.", resource_path);
+
+				Ok(())
+			}
+		},
+		Commands::Page { command } => match command {
+			PageCommands::New {
+				id,
+				title,
+				template,
+			} => {
+				let page_path = cli
+					.site_path
+					.join(webdog::PAGES_PATH)
+					.join(&id)
+					.with_extension("md");
+				if page_path.exists() {
+					eprintln!("page already exists!");
+					return Ok(());
+				}
+				let fm = FrontMatter {
+					content: "new page :)".to_string(),
+					data: Some(PageMetadata {
+						title,
+						template,
+						..Default::default()
+					}),
+				};
+				std::fs::write(&page_path, fm.format()?)?;
+
+				println!("Page created! Edit at {:?}.", page_path);
 
 				Ok(())
 			}

@@ -39,7 +39,7 @@ impl Extra {
 }
 
 /// Data for extras.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ExtraData {
 	/// The name of the extra to run.
 	pub name: String,
