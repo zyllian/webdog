@@ -24,7 +24,7 @@ cd my-site
 webdog serve # your site is now running at http://127.0.0.1:8080 🥳
 ```
 
-and from there, you can editing your site and adding pages!
+and from there, you can start editing your site and adding pages!
 
 ```sh
 webdog page new my-first-page "My First Page"
