@@ -55,10 +55,6 @@ the site name to use for the embed.
 
 the embed's description. optional.
 
-#### `url`
-
-full url for the embed. optional?
-
 #### `image`
 
 full url to an image to use for the embed. optional.
