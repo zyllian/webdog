@@ -128,6 +128,9 @@ pub struct PageMetadata {
 	/// The extra stuff to run for the page, if any.
 	#[serde(default)]
 	pub extra: Option<ExtraData>,
+	/// Custom values passed to the base template.
+	#[serde(default)]
+	pub userdata: serde_yml::Value,
 }
 
 /// Struct containing information about the site.

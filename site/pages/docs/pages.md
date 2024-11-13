@@ -77,6 +77,10 @@ list of extra stylesheets to include in the page.
 
 see <a href="extras">extras documentation</a> for more info on this field.
 
+### `userdata`
+
+custom userdata to supply to the page's base template.
+
 ## special features
 
 in addition to standard markdown, webdog comes with some minor additions for ease of use.

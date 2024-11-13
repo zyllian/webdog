@@ -24,6 +24,8 @@ struct TemplateData<'a, T> {
 	pub title: &'a str,
 	/// Custom template data.
 	pub data: T,
+	/// Userdata supplied from the page.
+	pub userdata: serde_yml::Value,
 }
 
 /// Struct used to build the site.
@@ -320,6 +322,7 @@ impl SiteBuilder {
 				page: page_html,
 				title: &title,
 				data: extra_data,
+				userdata: page_metadata.userdata,
 			})?,
 		)?;
 

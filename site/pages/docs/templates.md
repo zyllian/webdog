@@ -30,3 +30,28 @@ the main html content for the page to be rendered. can be rendered anywhere you 
   {% block content %}{{ page | safe }}{% endblock content %}
 </main>
 ```
+
+### `userdata`
+
+custom userdata provided by the page to be rendered.
+
+if a page defines its userdata as follows:
+
+```yaml
+userdata:
+  value: 5
+```
+
+you may use it like so:
+
+```tera
+{{ userdata.value }}
+```
+
+or, to only use it only if it exists:
+
+```tera
+{% if userdata is object and 'value' in userdata %}
+{{ userdata.value }}
+{% endif %}
+```
