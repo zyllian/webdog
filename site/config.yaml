@@ -14,9 +14,10 @@ resources:
     resource_template: blog/blog.tera
     resource_list_template: blog/list.tera
     tag_list_template: basic-link-list.tera
-    rss_template: blog/rss.tera
-    rss_title: webdog blog
-    rss_description: feed of recent webdog blog posts.
+    rss:
+      template: blog/rss.tera
+      title: webdog blog
+      description: feed of recent webdog blog posts.
     list_title: blog
     tag_list_title: blog tags
     resource_name_plural: blog posts

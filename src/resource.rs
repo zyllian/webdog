@@ -113,6 +113,7 @@ impl EmbedMetadata {
 struct ResourceListTemplateData<'r> {
 	resources: Vec<&'r ResourceTemplateData<'r>>,
 	tag: Option<&'r str>,
+	rss_enabled: bool,
 	page: usize,
 	page_max: usize,
 	previous: Option<usize>,
@@ -134,12 +135,8 @@ pub struct ResourceBuilderConfig {
 	pub resource_list_template: String,
 	/// The template used to render the resource's tag pages.
 	pub tag_list_template: String,
-	/// Template used when rendering the RSS feed.
-	pub rss_template: String,
-	/// The RSS feed's title.
-	pub rss_title: String,
-	/// The description for the RSS feed.
-	pub rss_description: String,
+	/// The resource type's RSS info, if enabled.
+	pub rss: Option<ResourceRSSBuilderConfig>,
 	/// Title for the main list of resources.
 	pub list_title: String,
 	/// Title for the page containing a list of tags.
@@ -148,6 +145,16 @@ pub struct ResourceBuilderConfig {
 	pub resource_name_plural: String,
 	/// The number of resources to display on a single page.
 	pub resources_per_page: usize,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ResourceRSSBuilderConfig {
+	/// Template used when rendering the RSS feed.
+	pub template: String,
+	/// The RSS feed's title.
+	pub title: String,
+	/// The description for the RSS feed.
+	pub description: String,
 }
 
 /// Helper to genericize resource building.
@@ -332,6 +339,7 @@ impl ResourceBuilder {
 					ResourceListTemplateData {
 						resources: iter.copied().collect(),
 						tag,
+						rss_enabled: config.rss.is_some(),
 						page: page + 1,
 						page_max,
 						previous,
@@ -409,49 +417,51 @@ impl ResourceBuilder {
 		}
 
 		// Build RSS feed
-		let mut items = Vec::with_capacity(data.len());
-		for resource in data {
-			items.push(
-				ItemBuilder::default()
-					.title(Some(resource.resource.data().title.to_owned()))
-					.link(Some(
-						builder
-							.site
-							.config
-							.base_url
-							.join(&format!(
-								"{}/{}",
-								self.config.output_path_resources, resource.id
-							))?
-							.to_string(),
-					))
-					.description(resource.resource.data().desc.clone())
-					.pub_date(Some(resource.timestamp.format(&Rfc2822)?))
-					.content(Some(builder.tera.render(
-						&self.config.rss_template,
-						&tera::Context::from_serialize(resource)?,
-					)?))
-					.build(),
-			)
-		}
+		if let Some(rss) = &self.config.rss {
+			let mut items = Vec::with_capacity(data.len());
+			for resource in data {
+				items.push(
+					ItemBuilder::default()
+						.title(Some(resource.resource.data().title.to_owned()))
+						.link(Some(
+							builder
+								.site
+								.config
+								.base_url
+								.join(&format!(
+									"{}/{}",
+									self.config.output_path_resources, resource.id
+								))?
+								.to_string(),
+						))
+						.description(resource.resource.data().desc.clone())
+						.pub_date(Some(resource.timestamp.format(&Rfc2822)?))
+						.content(Some(builder.tera.render(
+							&rss.template,
+							&tera::Context::from_serialize(resource)?,
+						)?))
+						.build(),
+				)
+			}
 
-		let channel = ChannelBuilder::default()
-			.title(self.config.rss_title.clone())
-			.link(
-				builder
-					.site
-					.config
-					.base_url
-					.join(&format!("{}/", self.config.output_path_lists))
-					.expect("Should never fail"),
-			)
-			.description(self.config.rss_description.clone())
-			.last_build_date(Some(OffsetDateTime::now_utc().format(&Rfc2822)?))
-			.items(items)
-			.build();
-		channel.validate().wrap_err("Failed to validate RSS feed")?;
-		let out = channel.to_string();
-		std::fs::write(out_long.join("rss.xml"), out)?;
+			let channel = ChannelBuilder::default()
+				.title(rss.title.clone())
+				.link(
+					builder
+						.site
+						.config
+						.base_url
+						.join(&format!("{}/", self.config.output_path_lists))
+						.expect("Should never fail"),
+				)
+				.description(rss.description.clone())
+				.last_build_date(Some(OffsetDateTime::now_utc().format(&Rfc2822)?))
+				.items(items)
+				.build();
+			channel.validate().wrap_err("Failed to validate RSS feed")?;
+			let out = channel.to_string();
+			std::fs::write(out_long.join("rss.xml"), out)?;
+		}
 
 		Ok(())
 	}

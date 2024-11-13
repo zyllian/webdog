@@ -66,6 +66,9 @@ Arguments:
   <ID>      The resource type's ID
   <NAME>    The name of the resource type to create
   <PLURAL>  The name of the resource type, but plural
+
+Options:
+      --no-rss       Whether to skip enabling RSS for this resource or not
 ```
 
 ## `webdog page new`

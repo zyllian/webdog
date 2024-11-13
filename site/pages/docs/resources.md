@@ -73,17 +73,23 @@ the link to actually use for the link.
 
 the link's title.
 
-### `rss_template`
+### `rss`
+
+the resource type's rss info. if not present, no rss feed will be built.
+
+consists of the following properties:
+
+#### `template`
 
 the template used to render the resource type's rss feed's html content.
 
 this template is provided a single resource's properties as its properties.
 
-### `rss_title`
+#### `title`
 
 the title for the resource type's rss feed.
 
-### `rss_description`
+#### `description`
 
 the description for the resource type's rss feed.
 

@@ -6,7 +6,9 @@
 {% else %}
 <h1>blog Posts</h1>
 <p><a href="tags">view blog tags</a></p>
+{% if data.rss_enabled %}
 <p><a href="rss.xml">rss feed</a></p>
+{% endif %}
 {% endif %}
 <h1>Page {{data.page}}/{{data.page_max}}</h1>
 {% if data.previous %}

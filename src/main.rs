@@ -6,7 +6,7 @@ use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 use url::Url;
 use webdog::{
 	frontmatter::FrontMatter,
-	resource::{ResourceBuilderConfig, ResourceMetadata},
+	resource::{ResourceBuilderConfig, ResourceMetadata, ResourceRSSBuilderConfig},
 	PageMetadata, Site, SiteConfig,
 };
 
@@ -93,6 +93,9 @@ enum ResourceCommands {
 		name: String,
 		/// The name of the resource type, but plural.
 		plural: String,
+		/// Whether to skip enabling RSS for this resource or not.
+		#[arg(long, default_value = "false")]
+		no_rss: bool,
 	},
 }
 
@@ -163,7 +166,12 @@ fn main() -> eyre::Result<()> {
 			Ok(())
 		}
 		Commands::Resource { command } => match command {
-			ResourceCommands::Create { id, name, plural } => {
+			ResourceCommands::Create {
+				id,
+				name,
+				plural,
+				no_rss,
+			} => {
 				let config_path = cli.site.join(SiteConfig::FILENAME);
 				let mut config = SiteConfig::read(&cli.site)?;
 				if config.resources.contains_key(&id) {
@@ -196,6 +204,12 @@ fn main() -> eyre::Result<()> {
 					}
 				}
 
+				let rss = (!no_rss).then(|| ResourceRSSBuilderConfig {
+					template: format!("{id}/rss.tera"),
+					title: id.clone(),
+					description: Default::default(),
+				});
+
 				let resource_config = ResourceBuilderConfig {
 					source_path: id.clone(),
 					output_path_resources: id.clone(),
@@ -203,9 +217,7 @@ fn main() -> eyre::Result<()> {
 					resource_template: format!("{id}/resource.tera"),
 					resource_list_template: format!("{id}/list.tera"),
 					tag_list_template: "basic-link-list.tera".to_string(),
-					rss_template: format!("{id}/rss.tera"),
-					rss_title: id.clone(),
-					rss_description: Default::default(),
+					rss,
 					list_title: name.clone(),
 					tag_list_title: format!("{name} tags"),
 					resource_name_plural: plural,
