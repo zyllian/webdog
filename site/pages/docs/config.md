@@ -21,7 +21,7 @@ presently unused field, set this to any string you like.
 
 ## `build`
 
-the directory for the site to build to. defaults to `&lt;site-path&gt;/build` if not specified.
+the directory for the site to build to. defaults to `<site-path>/build` if not specified.
 
 **!!WARNING!! this may not function properly, it is untested in any version and should not be relied upon in future versions**
 
