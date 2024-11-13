@@ -81,7 +81,7 @@ pub struct EmbedMetadata {
 
 impl EmbedMetadata {
 	/// builds the embed html tags
-	pub fn build(self, builder: &SiteBuilder) -> String {
+	pub fn build(self, builder: &SiteBuilder) -> eyre::Result<String> {
 		let mut s = format!(
 			r#"<meta content="{}" property="og:title"><meta content="{}" property="og:url">"#,
 			self.title, builder.site.config.base_url
@@ -93,7 +93,10 @@ impl EmbedMetadata {
 		if let Some(description) = self.description {
 			s = format!(r#"{s}<meta content="{description}" property="og:description">"#);
 		}
-		if let Some(image) = self.image {
+		if let Some(mut image) = self.image {
+			if image.starts_with("cdn$") {
+				image = builder.site.config.cdn_url(&image[4..])?.to_string();
+			}
 			s = format!(r#"{s}<meta content="{image}" property="og:image">"#);
 		}
 		s = format!(
@@ -104,7 +107,7 @@ impl EmbedMetadata {
 			s = format!(r#"{s}<meta name="twitter:card" content="summary_large_image">"#);
 		}
 
-		s
+		Ok(s)
 	}
 
 	pub fn default_theme_color() -> String {

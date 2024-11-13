@@ -287,10 +287,11 @@ impl SiteBuilder {
 			_ => self.site.config.title.clone(),
 		};
 
-		let head = page_metadata.embed.map(|mut embed| {
-			embed.site_name.clone_from(&self.site.config.title);
-			embed.build(self)
-		});
+		let head = if let Some(embed) = page_metadata.embed {
+			Some(embed.build(self)?)
+		} else {
+			None
+		};
 
 		let out = self.tera.render(
 			&page_metadata

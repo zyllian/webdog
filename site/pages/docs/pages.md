@@ -59,6 +59,8 @@ the embed's description. optional.
 
 full url to an image to use for the embed. optional.
 
+prefixing a url with `cdn$` will join it with the site's cdn url as defined in the site config.
+
 #### `theme_color`
 
 the theme color to use for the embed. optional, but the default is currently nonconfigurable.
