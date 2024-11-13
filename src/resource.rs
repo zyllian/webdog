@@ -68,8 +68,6 @@ impl<'r> ResourceTemplateData<'r> {
 pub struct EmbedMetadata {
 	pub title: String,
 	#[serde(default)]
-	pub site_name: String,
-	#[serde(default)]
 	pub description: Option<String>,
 	#[serde(default)]
 	pub image: Option<String>,
@@ -83,12 +81,8 @@ impl EmbedMetadata {
 	/// builds the embed html tags
 	pub fn build(self, builder: &SiteBuilder) -> eyre::Result<String> {
 		let mut s = format!(
-			r#"<meta content="{}" property="og:title"><meta content="{}" property="og:url">"#,
-			self.title, builder.site.config.base_url
-		);
-		s = format!(
-			r#"{s}<meta content="{}" property="og:site_name">"#,
-			self.site_name
+			r#"<meta content="{}" property="og:title"><meta content="{}" property="og:url"><meta content="{}" property="og:site_name">"#,
+			self.title, builder.site.config.base_url, builder.site.config.title,
 		);
 		if let Some(description) = self.description {
 			s = format!(r#"{s}<meta content="{description}" property="og:description">"#);
@@ -261,7 +255,6 @@ impl ResourceBuilder {
 				title: Some(data.title.clone()),
 				embed: Some(EmbedMetadata {
 					title: data.title.clone(),
-					site_name: builder.site.config.title.clone(),
 					description: data.desc.clone(),
 					image: if let Some(cdn_file) = &data.cdn_file {
 						Some(builder.site.config.cdn_url(cdn_file)?.to_string())

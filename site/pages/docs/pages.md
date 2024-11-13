@@ -47,10 +47,6 @@ table containing the following fields:
 
 the custom embed's title.
 
-#### `site_name`
-
-the site name to use for the embed.
-
 #### `description`
 
 the embed's description. optional.
