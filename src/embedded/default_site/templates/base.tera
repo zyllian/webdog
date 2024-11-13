@@ -21,9 +21,11 @@
 
 <body>
 	<h1><a href="/">webdog site</a></h1>
+	{% block precontent %}{% endblock precontent %}
 	<main class="page">
 		{% block content %}{{ page | safe }}{% endblock content %}
 	</main>
+	{% block postcontent %}{% endblock postcontent %}
 </body>
 
 </html>
