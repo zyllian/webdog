@@ -5,14 +5,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="referrer" content="no-referrer">
 	<link rel="stylesheet" href="/styles/index.css">
-	<title>{{ title }}</title>
-	{{ head | safe }}
-	{% for script in scripts %}
-	<script type="text/javascript" src="{{script}}" defer></script>
-	{% endfor %}
-	{% for style in styles %}
-	<link rel="stylesheet" href="/styles/{{style}}">
-	{% endfor %}
 </head>
 
 <body>

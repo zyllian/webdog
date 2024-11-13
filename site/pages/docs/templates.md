@@ -19,55 +19,7 @@ all templates are given the following variables:
 
 ### `title`
 
-the page's title. this should be rendered in the `<head>` html element like so:
-
-```html
-<head>
-  <title>{{ title }}</title>
-</head>
-```
-
-this variable will no longer be required to set the page title before the first crates.io release.
-
-### `head`
-
-the page's extra head data. this should be rendered in the `<head>` html element like so:
-
-```html
-<head>
-  {{ head | safe }}
-</head>
-```
-
-this variable will be removed before the first crates.io release.
-
-### `scripts`
-
-the page's extra scripts. this should be rendered in the `<head>` html element like so:
-
-```html
-<head>
-  {% for script in scripts %}
-  <script type="text/javascript" src="{{script}}" defer></script>
-  {% endfor %}
-</head>
-```
-
-this variable will be removed before the first crates.io release.
-
-### `styles`
-
-the page's extra stylesheets. this should be rendered in the `<head>` html element like so:
-
-```html
-<head>
-  {% for style in styles %}
-  <link rel="stylesheet" href="/styles/{{style}}" />
-  {% endfor %}
-</head>
-```
-
-this variable will be removed before the first crates.io release.
+the page's full title, as shown in the browser tab.
 
 ### `page`
 

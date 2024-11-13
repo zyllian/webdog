@@ -22,12 +22,6 @@ struct TemplateData<'a, T> {
 	pub page: &'a str,
 	/// The page's title.
 	pub title: &'a str,
-	/// Custom head data for the page.
-	pub head: Option<String>,
-	/// The page's custom scripts.
-	pub scripts: &'a [String],
-	/// the page's custom styles.
-	pub styles: &'a [String],
 	/// Custom template data.
 	pub data: T,
 }
@@ -159,7 +153,14 @@ impl SiteBuilder {
 	}
 
 	/// Function to rewrite HTML wow.
-	pub fn rewrite_html(&self, html: String) -> eyre::Result<String> {
+	pub fn rewrite_html(
+		&self,
+		html: String,
+		title: &str,
+		head: &Option<String>,
+		scripts: &[String],
+		styles: &[String],
+	) -> eyre::Result<String> {
 		let mut output = Vec::new();
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
@@ -172,6 +173,24 @@ impl SiteBuilder {
 					}),
 					element!("head", |el| {
 						el.prepend(r#"<meta charset="utf-8">"#, ContentType::Html);
+						el.append(&format!("<title>{title}</title>"), ContentType::Html);
+						if let Some(head) = head {
+							el.append(head, ContentType::Html);
+						}
+						for script in scripts {
+							el.append(
+								&format!(
+									r#"<script type="text/javascript" src="{script}" defer></script>"#
+								),
+								ContentType::Html,
+							);
+						}
+						for style in styles {
+							el.append(
+								&format!(r#"<link rel="stylesheet" href="/styles/{style}">"#),
+								ContentType::Html,
+							);
+						}
 						el.append(
 							r#"<script type="text/javascript" src="/webdog/webdog.js" defer></script>"#,
 							ContentType::Html,
@@ -300,15 +319,18 @@ impl SiteBuilder {
 			&tera::Context::from_serialize(TemplateData {
 				page: page_html,
 				title: &title,
-				head,
-				scripts: &page_metadata.scripts,
-				styles: &page_metadata.styles,
 				data: extra_data,
 			})?,
 		)?;
 
 		// Modify HTML output
-		let mut out = self.rewrite_html(out)?;
+		let mut out = self.rewrite_html(
+			out,
+			&title,
+			&head,
+			&page_metadata.scripts,
+			&page_metadata.styles,
+		)?;
 
 		if let Some(data) = extra {
 			if let Some(extra) = crate::extras::get_extra(&data.name) {
