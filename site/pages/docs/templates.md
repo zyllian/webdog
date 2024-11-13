@@ -9,30 +9,6 @@ in webdog, [Tera](https://keats.github.io/tera/) templates are used as the backb
 
 when you create your site, a file at `templates/base.tera` will be created, acting as the default base template for all pages.
 
-## base template variables
-
-a great deal of information is given to templates used as bases, such as:
-
-### `title`
-
-the page's title. used to set the page's title in the head, though this will no longer be needed in a future update.
-
-### `head`
-
-html code which must be written to the head using the safe filter. will be removed in a future update.
-
-### `scripts`
-
-a list of extra scripts to apply to the page. will be removed in a future update.
-
-### `styles`
-
-a list of extra stylesheets to apply to the page. will be removed in a future update.
-
-### `page`
-
-html code for the page. must be rendered to the page using the safe filter.
-
 ## base template blocks
 
 all base templates should include a block named `content`. this will be used in other templates, particularly resource templates, to render to the correct location on the page.
