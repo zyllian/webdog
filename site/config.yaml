@@ -9,8 +9,8 @@ code_theme: base16-ocean.dark # options: base16-ocean.dark, base16-eighties.dark
 resources:
   blog:
     source_path: blog
-    output_path_short: blog
-    output_path_long: blog
+    output_path_resources: blog
+    output_path_lists: blog
     resource_template: blog/blog.tera
     resource_list_template: blog/list.tera
     tag_list_template: basic-link-list.tera

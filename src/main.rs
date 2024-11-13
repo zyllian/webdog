@@ -198,8 +198,8 @@ fn main() -> eyre::Result<()> {
 
 				let resource_config = ResourceBuilderConfig {
 					source_path: id.clone(),
-					output_path_short: id.clone(),
-					output_path_long: id.clone(),
+					output_path_resources: id.clone(),
+					output_path_lists: id.clone(),
 					resource_template: format!("{id}/resource.tera"),
 					resource_list_template: format!("{id}/list.tera"),
 					tag_list_template: "basic-link-list.tera".to_string(),

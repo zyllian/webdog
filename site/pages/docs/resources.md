@@ -17,13 +17,13 @@ each resource added has its own configuration inside of the main site config fil
 
 the source path for where the resources of this type are located, relative to `<site_path>/resources/`.
 
-### `output_path_short`
+### `output_path_resources`
 
-the path prefix for a resource, i.e. "blog" for `/blog/<post id>` or "i" for `/i/<image id>`. can be shared with `output_path_long` for them to have the same prefix.
+the path prefix for a resource, i.e. "blog" for `/blog/<post id>` or "i" for `/i/<image id>`. can be shared with `output_path_lists` for them to have the same prefix.
 
-### `output_path_long`
+### `output_path_lists`
 
-the path prefix for other resource pages, like the overview or tags. i.e. "blog" for `/blog/tags/<tag>` or "images" for `/images/tags/<tag>`. can be shared with `output_path_short` for them to have the same prefix.
+the path prefix for other resource pages, like the overview or tags. i.e. "blog" for `/blog/tags/<tag>` or "images" for `/images/tags/<tag>`. can be shared with `output_path_resources` for them to have the same prefix.
 
 ### `resource_template`
 

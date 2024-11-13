@@ -125,9 +125,9 @@ pub struct ResourceBuilderConfig {
 	/// Path to where the resources should be loaded from.
 	pub source_path: String,
 	/// Path to where the resource pages should be written to.
-	pub output_path_short: String,
+	pub output_path_resources: String,
 	/// Path to where the main list should be written to.
-	pub output_path_long: String,
+	pub output_path_lists: String,
 	/// The template used to render a single resource.
 	pub resource_template: String,
 	/// The template used to render a list of resources.
@@ -234,7 +234,7 @@ impl ResourceBuilder {
 	/// Gets a resource's build path.
 	fn build_path(&self, base_path: &Path, id: &str) -> PathBuf {
 		base_path
-			.join(&self.config.output_path_short)
+			.join(&self.config.output_path_resources)
 			.join(id)
 			.with_extension("html")
 	}
@@ -279,8 +279,8 @@ impl ResourceBuilder {
 	}
 
 	pub fn build_all(&self, builder: &SiteBuilder) -> eyre::Result<()> {
-		let out_short = builder.build_path.join(&self.config.output_path_short);
-		let out_long = builder.build_path.join(&self.config.output_path_long);
+		let out_short = builder.build_path.join(&self.config.output_path_resources);
+		let out_long = builder.build_path.join(&self.config.output_path_lists);
 
 		if !out_short.exists() {
 			std::fs::create_dir_all(&out_short)?;
@@ -378,7 +378,7 @@ impl ResourceBuilder {
 					let count = data.len();
 					(
 						Link::new(
-							format!("/{}/tag/{tag}/", self.config.output_path_short),
+							format!("/{}/tag/{tag}/", self.config.output_path_resources),
 							format!("{tag} ({count})"),
 						),
 						count,
@@ -421,7 +421,7 @@ impl ResourceBuilder {
 							.base_url
 							.join(&format!(
 								"{}/{}",
-								self.config.output_path_short, resource.id
+								self.config.output_path_resources, resource.id
 							))?
 							.to_string(),
 					))
@@ -442,7 +442,7 @@ impl ResourceBuilder {
 					.site
 					.config
 					.base_url
-					.join(&format!("{}/", self.config.output_path_long))
+					.join(&format!("{}/", self.config.output_path_lists))
 					.expect("Should never fail"),
 			)
 			.description(self.config.rss_description.clone())
