@@ -289,7 +289,7 @@ impl SiteBuilder {
 
 		let head = page_metadata.embed.map(|mut embed| {
 			embed.site_name.clone_from(&self.site.config.title);
-			embed.build()
+			embed.build(self)
 		});
 
 		let out = self.tera.render(

@@ -72,8 +72,6 @@ pub struct EmbedMetadata {
 	#[serde(default)]
 	pub description: Option<String>,
 	#[serde(default)]
-	pub url: Option<String>,
-	#[serde(default)]
 	pub image: Option<String>,
 	#[serde(default = "EmbedMetadata::default_theme_color")]
 	pub theme_color: String,
@@ -83,17 +81,17 @@ pub struct EmbedMetadata {
 
 impl EmbedMetadata {
 	/// builds the embed html tags
-	pub fn build(self) -> String {
-		let mut s = format!(r#"<meta content="{}" property="og:title">"#, self.title);
+	pub fn build(self, builder: &SiteBuilder) -> String {
+		let mut s = format!(
+			r#"<meta content="{}" property="og:title"><meta content="{}" property="og:url">"#,
+			self.title, builder.site.config.base_url
+		);
 		s = format!(
 			r#"{s}<meta content="{}" property="og:site_name">"#,
 			self.site_name
 		);
 		if let Some(description) = self.description {
 			s = format!(r#"{s}<meta content="{description}" property="og:description">"#);
-		}
-		if let Some(url) = self.url {
-			s = format!(r#"{s}<meta content="{url}" property="og:url">"#);
 		}
 		if let Some(image) = self.image {
 			s = format!(r#"{s}<meta content="{image}" property="og:image">"#);
@@ -267,7 +265,6 @@ impl ResourceBuilder {
 					} else {
 						None
 					},
-					url: None,
 					theme_color: EmbedMetadata::default_theme_color(),
 					large_image: true,
 				}),
