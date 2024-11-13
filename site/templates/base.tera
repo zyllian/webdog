@@ -21,13 +21,16 @@
 			<a class="name" href="/">webdog</a>
 		</span>
 		<span class="spacer"></span>
+		<a href="/docs/">documentation</a> |
 		<a href="/blog/">blog</a> |
 		<a href="https://github.com/zyllian/webdog" rel="noopener noreferrer">github</a>
 	</header>
 	<div id="content">
+		{% block precontent %}{% endblock precontent %}
 		<main class="page">
 			{% block content %}{{ page | safe }}{% endblock content %}
 		</main>
+		{% block postcontent %}{% endblock postcontent %}
 	</div>
 </body>
 

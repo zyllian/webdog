@@ -1,0 +1,20 @@
+{% extends "base.tera" %}
+
+{% macro docLink(text, href, first=false) %}
+{% if not first %}&bullet; {% endif %}
+<a href="/docs/{{href}}">{{ text }}</a>
+{% endmacro docLink %}
+
+{% block content %}
+<div class="docs-links">
+	{{ self::docLink(text="docs", href="", first=true) }}
+	{{ self::docLink(text="commands", href="commands") }}
+	{{ self::docLink(text="configuration", href="config") }}
+	{{ self::docLink(text="pages", href="pages") }}
+	{{ self::docLink(text="templates", href="templates") }}
+	{{ self::docLink(text="styling", href="styling") }}
+	{{ self::docLink(text="resources", href="resources") }}
+	{{ self::docLink(text="webdog assumptions", href="wd-assumptions") }}
+</div>
+{{ page | safe }}
+{% endblock precontent %}
