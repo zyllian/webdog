@@ -7,18 +7,3 @@ cdn_url: "https://i.zyl.gay/webdog/"
 code_theme: base16-ocean.dark # options: base16-ocean.dark, base16-eighties.dark, base16-mocha.dark, base16-ocean.light, InspiredGitHub, Solarized (dark), and Solarized (light)
 
 resources:
-  blog:
-    source_path: blog
-    output_path_resources: blog
-    output_path_lists: blog
-    resource_template: blog/blog.tera
-    resource_list_template: blog/list.tera
-    tag_list_template: basic-link-list.tera
-    rss:
-      template: blog/rss.tera
-      title: webdog blog
-      description: feed of recent webdog blog posts.
-    list_title: blog
-    tag_list_title: blog tags
-    resource_name_plural: blog posts
-    resources_per_page: 20
