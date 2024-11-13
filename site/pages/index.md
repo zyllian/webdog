@@ -19,7 +19,7 @@ cargo install webdog --git https://github.com/zyllian/webdog
 then you can make your first webdog site!
 
 ```sh
-webdog create https://example.com "My First Site!" --site-path my-site
+webdog create https://example.com "My First Site!" --site my-site
 cd my-site
 webdog serve # your site is now running at http://127.0.0.1:8080 🥳
 ```
