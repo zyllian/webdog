@@ -1,9 +1,9 @@
 {% extends "base.tera" %}
 {% block content %}
-<h1>{{ title }}</h1>
+<h1>{{ data.title }}</h1>
 <div class="link-list">
 	<ul>
-		{% for link in links %}
+		{% for link in data.links %}
 		<li><a href="{{link.link}}">{{link.title}}</a></li>
 		{% endfor %}
 	</ul>

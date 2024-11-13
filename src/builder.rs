@@ -29,8 +29,7 @@ struct TemplateData<'a, T> {
 	/// the page's custom styles.
 	pub styles: &'a [String],
 	/// Custom template data.
-	#[serde(flatten)]
-	pub extra_data: T,
+	pub data: T,
 }
 
 /// Struct used to build the site.
@@ -303,7 +302,7 @@ impl SiteBuilder {
 				head,
 				scripts: &page_metadata.scripts,
 				styles: &page_metadata.styles,
-				extra_data,
+				data: extra_data,
 			})?,
 		)?;
 
