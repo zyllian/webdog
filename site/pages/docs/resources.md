@@ -109,6 +109,10 @@ the name of this resource type if it is plural.
 
 how many resources of this type to display per page when content is paginated.
 
+### `timestamp_format`
+
+format to display timestamps as, as defined by version 2 of [the rust time crate's format description](https://time-rs.github.io/book/api/format-description.html).
+
 ## defining a resource
 
 resources are made up of markdown files with yaml front matter. for instance:
@@ -154,3 +158,11 @@ whether the resource is a draft and should be excluded from normal builds. defau
 ### other properties
 
 resources may add extra properties which will get passed to the various resource templates later. simply add the property like it was any other property.
+
+## extra properties
+
+in addition to the resource properties, resources may receive additional properties from webdog as follows:
+
+### `readable_timestamp`
+
+the resource's timestamp in the timestamp format provided in the resource type's config.

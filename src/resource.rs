@@ -7,11 +7,12 @@ use eyre::Context;
 use itertools::Itertools;
 use pulldown_cmark::{Options, Parser};
 use rss::{validation::Validate, ChannelBuilder, ItemBuilder};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use time::{format_description::well_known::Rfc2822, OffsetDateTime};
 
 use crate::{
-	builder::SiteBuilder, frontmatter::FrontMatterRequired, link_list::Link, PageMetadata,
+	builder::SiteBuilder, frontmatter::FrontMatterRequired, link_list::Link,
+	util::format_timestamp, PageMetadata,
 };
 
 /// Metadata for resources.
@@ -43,24 +44,8 @@ pub struct ResourceTemplateData<'r> {
 	pub resource: &'r FrontMatterRequired<ResourceMetadata>,
 	/// The resource's ID.
 	pub id: String,
-	/// The resource's timestamp. Duplicated to change serialization method.
-	#[serde(serialize_with = "ResourceTemplateData::timestamp_formatter")]
-	pub timestamp: OffsetDateTime,
-}
-
-impl<'r> ResourceTemplateData<'r> {
-	fn timestamp_formatter<S>(timestamp: &OffsetDateTime, serializer: S) -> Result<S::Ok, S::Error>
-	where
-		S: Serializer,
-	{
-		let out = timestamp
-			.format(
-				&time::format_description::parse("[weekday], [month repr:long] [day], [year]")
-					.expect("Should never fail"),
-			)
-			.expect("Should never fail");
-		serializer.serialize_str(&out)
-	}
+	/// The resource's timestamp in a readable format.
+	pub readable_timestamp: String,
 }
 
 /// struct for adding custom meta content embeds
@@ -121,7 +106,7 @@ struct ResourceListTemplateData<'r> {
 }
 
 /// Config for the resource builder.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResourceBuilderConfig {
 	/// Path to where the resources should be loaded from.
 	pub source_path: String,
@@ -145,6 +130,8 @@ pub struct ResourceBuilderConfig {
 	pub resource_name_plural: String,
 	/// The number of resources to display on a single page.
 	pub resources_per_page: usize,
+	/// The format to use for the readable timestamp.
+	pub timestamp_format: String,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -158,7 +145,7 @@ pub struct ResourceRSSBuilderConfig {
 }
 
 /// Helper to genericize resource building.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct ResourceBuilder {
 	/// The builder's config.
 	pub config: ResourceBuilderConfig,
@@ -277,7 +264,10 @@ impl ResourceBuilder {
 			ResourceTemplateData {
 				resource,
 				id,
-				timestamp: resource.data.as_ref().expect("should never fail").timestamp,
+				readable_timestamp: format_timestamp(
+					resource.data().timestamp,
+					&self.config.timestamp_format,
+				)?,
 			},
 		)?;
 		std::fs::write(out_path, out)?;
@@ -307,7 +297,10 @@ impl ResourceBuilder {
 			data.push(ResourceTemplateData {
 				resource,
 				id: id.clone(),
-				timestamp: resource.data().timestamp,
+				readable_timestamp: format_timestamp(
+					resource.data().timestamp,
+					&self.config.timestamp_format,
+				)?,
 			});
 		}
 
@@ -435,7 +428,7 @@ impl ResourceBuilder {
 								.to_string(),
 						))
 						.description(resource.resource.data().desc.clone())
-						.pub_date(Some(resource.timestamp.format(&Rfc2822)?))
+						.pub_date(Some(resource.resource.data().timestamp.format(&Rfc2822)?))
 						.content(Some(builder.tera.render(
 							&rss.template,
 							&tera::Context::from_serialize(resource)?,

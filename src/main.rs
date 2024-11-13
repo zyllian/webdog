@@ -222,6 +222,7 @@ fn main() -> eyre::Result<()> {
 					tag_list_title: format!("{name} tags"),
 					resource_name_plural: plural,
 					resources_per_page: 3,
+					timestamp_format: "[weekday], [month repr:long] [day], [year]".to_string(),
 				};
 
 				config.resources.insert(id.clone(), resource_config);

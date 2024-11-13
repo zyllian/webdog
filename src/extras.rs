@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use lol_html::{element, RewriteStrSettings};
 use serde::{Deserialize, Serialize};
 
@@ -91,22 +92,31 @@ fn resource_list_outside(
 
 	let data: ResourceListData = serde_yml::from_value(data.inner.clone())?;
 
+	let res_builder = builder
+		.resource_builders
+		.get(&data.resource)
+		.ok_or_else(|| eyre::eyre!("missing resource builder: {}", data.resource))?;
+
 	let resource_list = builder.tera.render(
 		&data.template,
 		&tera::Context::from_serialize(ResourceListTemplateData {
-			resources: builder
-				.resource_builders
-				.get(&data.resource)
-				.ok_or_else(|| eyre::eyre!("missing resource builder: {}", data.resource))?
+			resources: res_builder
 				.loaded_metadata
 				.iter()
 				.take(data.count)
-				.map(|(id, v)| ResourceTemplateData {
+				.map(|(id, v)| {
+					crate::util::format_timestamp(
+						v.data().timestamp,
+						&res_builder.config.timestamp_format,
+					)
+					.map(|ts| (id, v, ts))
+				})
+				.map_ok(|(id, v, ts)| ResourceTemplateData {
 					resource: v,
 					id: id.clone(),
-					timestamp: v.data().timestamp,
+					readable_timestamp: ts,
 				})
-				.collect(),
+				.collect::<eyre::Result<Vec<_>>>()?,
 		})?,
 	)?;
 
