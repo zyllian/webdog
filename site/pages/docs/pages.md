@@ -59,7 +59,7 @@ prefixing a url with `cdn$` will join it with the site's cdn url as defined in t
 
 #### `theme_color`
 
-the theme color to use for the embed. optional, but the default is currently nonconfigurable.
+the theme color to use for the embed. optional, defaults to the value in your site's configuration.
 
 #### `large_image`
 

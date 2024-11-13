@@ -19,6 +19,10 @@ the site's base title applied to all pages.
 
 presently unused field, set this to any string you like.
 
+## `theme_color`
+
+the default theme color to use for embed metadata.
+
 ## `build`
 
 the directory for the site to build to. defaults to `<site-path>/build` if not specified.

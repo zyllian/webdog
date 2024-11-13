@@ -71,8 +71,7 @@ pub struct EmbedMetadata {
 	pub description: Option<String>,
 	#[serde(default)]
 	pub image: Option<String>,
-	#[serde(default = "EmbedMetadata::default_theme_color")]
-	pub theme_color: String,
+	pub theme_color: Option<String>,
 	#[serde(default)]
 	pub large_image: bool,
 }
@@ -93,10 +92,11 @@ impl EmbedMetadata {
 			}
 			s = format!(r#"{s}<meta content="{image}" property="og:image">"#);
 		}
-		s = format!(
-			r#"{s}<meta content="{}" name="theme-color">"#,
-			self.theme_color
-		);
+		let theme_color = self
+			.theme_color
+			.as_ref()
+			.unwrap_or(&builder.site.config.theme_color);
+		s = format!(r#"{s}<meta content="{theme_color}" name="theme-color">"#);
 		if self.large_image {
 			s = format!(r#"{s}<meta name="twitter:card" content="summary_large_image">"#);
 		}
@@ -261,7 +261,7 @@ impl ResourceBuilder {
 					} else {
 						None
 					},
-					theme_color: EmbedMetadata::default_theme_color(),
+					theme_color: None,
 					large_image: true,
 				}),
 				..Default::default()

@@ -42,6 +42,8 @@ pub struct SiteConfig {
 	pub title: String,
 	/// The site's description? Not sure if this will actually be used or not
 	pub description: String,
+	/// the site's theme color for embed metadata
+	pub theme_color: String,
 	/// The site's build directory. Defaults to <site>/build if not specified.
 	pub build: Option<String>,
 	/// A list of Sass stylesheets that will be built.
@@ -68,6 +70,7 @@ impl SiteConfig {
 			base_url,
 			title,
 			description: Default::default(),
+			theme_color: "#ffc4fc".to_string(),
 			build: None,
 			sass_styles: vec!["index.scss".into()],
 			cdn_url,
