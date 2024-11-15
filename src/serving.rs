@@ -98,7 +98,7 @@ fn create(
 		let new_config = serde_yml::from_str(&std::fs::read_to_string(path)?)?;
 		builder.site.config = new_config;
 		builder.reload()?;
-		builder.site.build_all_pages(builder)?;
+		builder.build_all()?;
 	} else if let Ok(_sass_path) = relative_path.strip_prefix(SASS_PATH) {
 		if build {
 			builder.build_sass().wrap_err("Failed to rebuild Sass")?;

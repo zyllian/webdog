@@ -473,4 +473,18 @@ impl SiteBuilder {
 			.ok_or_else(|| eyre!("missing resource: {resource}"))?
 			.build_all(self)
 	}
+
+	/// Builds the entire site.
+	pub fn build_all(&self) -> eyre::Result<()> {
+		self.site.build_all_pages(self)?;
+		self.build_sass()?;
+
+		for (_source_path, config) in self.site.config.resources.iter() {
+			let mut res_builder = ResourceBuilder::new(config.clone());
+			res_builder.load_all(self)?;
+			res_builder.build_all(self)?;
+		}
+
+		Ok(())
+	}
 }

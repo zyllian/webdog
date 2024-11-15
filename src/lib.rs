@@ -178,18 +178,7 @@ impl Site {
 
 	/// Builds the site once.
 	pub fn build_once(self) -> eyre::Result<()> {
-		let builder = SiteBuilder::new(self, false)?.prepare()?;
-
-		builder.site.build_all_pages(&builder)?;
-		builder.build_sass()?;
-
-		for (_source_path, config) in builder.site.config.resources.iter() {
-			let mut res_builder = resource::ResourceBuilder::new(config.clone());
-			res_builder.load_all(&builder)?;
-			res_builder.build_all(&builder)?;
-		}
-
-		Ok(())
+		SiteBuilder::new(self, false)?.prepare()?.build_all()
 	}
 
 	/// Helper method to build all available pages.
