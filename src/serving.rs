@@ -91,7 +91,7 @@ fn create(
 	} else if let Ok(_template_path) = relative_path.strip_prefix(TEMPLATES_PATH) {
 		builder.tera.full_reload()?;
 		if build {
-			builder.site.build_all_pages(builder)?;
+			builder.build_all_pages()?;
 			builder.build_all_resources()?;
 		}
 	} else if relative_path.display().to_string() == SiteConfig::FILENAME {
@@ -126,8 +126,7 @@ fn remove(builder: &mut SiteBuilder, path: &Path, relative_path: &Path) -> eyre:
 	} else if let Ok(_template_path) = relative_path.strip_prefix(TEMPLATES_PATH) {
 		builder.tera.full_reload()?;
 		builder
-			.site
-			.build_all_pages(builder)
+			.build_all_pages()
 			.wrap_err("Failed to rebuild pages")?;
 	} else if let Ok(_sass_path) = relative_path.strip_prefix(SASS_PATH) {
 		builder.build_sass().wrap_err("Failed to rebuild Sass")?;

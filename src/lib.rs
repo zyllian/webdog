@@ -14,7 +14,6 @@ use std::{
 
 use extras::ExtraData;
 use eyre::Context;
-use rayon::prelude::*;
 use resource::{EmbedMetadata, ResourceBuilderConfig};
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -179,15 +178,5 @@ impl Site {
 	/// Builds the site once.
 	pub fn build_once(self) -> eyre::Result<()> {
 		SiteBuilder::new(self, false)?.prepare()?.build_all()
-	}
-
-	/// Helper method to build all available pages.
-	fn build_all_pages(&self, builder: &SiteBuilder) -> eyre::Result<()> {
-		self.page_index
-			.keys()
-			.par_bridge()
-			.try_for_each(|page_name| builder.build_page(page_name))?;
-
-		Ok(())
 	}
 }

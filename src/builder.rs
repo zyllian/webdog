@@ -5,6 +5,7 @@ use std::{collections::HashMap, path::PathBuf};
 use eyre::{eyre, Context, OptionExt};
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
 use pulldown_cmark::{Options, Parser};
+use rayon::prelude::*;
 use serde::Serialize;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tera::Tera;
@@ -458,6 +459,16 @@ impl SiteBuilder {
 		Ok(())
 	}
 
+	/// Builds all of the site's standard pages.
+	pub fn build_all_pages(&self) -> eyre::Result<()> {
+		self.site
+			.page_index
+			.keys()
+			.par_bridge()
+			.try_for_each(|page_name| self.build_page(page_name))?;
+		Ok(())
+	}
+
 	/// Builds all resource types.
 	pub fn build_all_resources(&self) -> eyre::Result<()> {
 		for builder in self.resource_builders.values() {
@@ -476,7 +487,7 @@ impl SiteBuilder {
 
 	/// Builds the entire site.
 	pub fn build_all(&self) -> eyre::Result<()> {
-		self.site.build_all_pages(self)?;
+		self.build_all_pages()?;
 		self.build_sass()?;
 
 		for (_source_path, config) in self.site.config.resources.iter() {
