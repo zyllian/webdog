@@ -4,7 +4,7 @@ name = "webdog"
 version = "0.1.0"
 
 [dependencies]
-clap = { version = "4", features = ["derive"] }
+clap = {version = "4", features = ["derive"]}
 color-eyre = {version = "0.6", optional = true}
 extract-frontmatter = "4"
 eyre = "0.6"
@@ -28,7 +28,7 @@ serde_yml = "0.0.12"
 syntect = "5"
 tera = "1"
 time = {version = "0.3", features = ["serde-human-readable"]}
-tokio = {version = "1.10", features = [
+tokio = {version = "1", features = [
   "macros",
   "rt-multi-thread",
 ], optional = true}
