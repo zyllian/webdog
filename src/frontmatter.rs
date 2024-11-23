@@ -12,6 +12,18 @@ pub struct FrontMatter<T> {
 	pub data: Option<T>,
 }
 
+impl<T> FrontMatter<T> {
+	/// Creates a new front matter.
+	pub fn new(data: Option<T>, content: String) -> Self {
+		Self { data, content }
+	}
+
+	/// Creates a new front matter without content.
+	pub fn new_empty(data: Option<T>) -> Self {
+		Self::new(data, String::new())
+	}
+}
+
 impl<T> FrontMatter<T>
 where
 	T: DeserializeOwned,
@@ -63,6 +75,16 @@ where
 pub struct FrontMatterRequired<T>(FrontMatter<T>);
 
 impl<T> FrontMatterRequired<T> {
+	/// Creates a new front matter.
+	pub fn new(data: T, content: String) -> Self {
+		Self(FrontMatter::new(Some(data), content))
+	}
+
+	/// Creates a new front matter without content.
+	pub fn new_empty(data: T) -> Self {
+		Self(FrontMatter::new_empty(Some(data)))
+	}
+
 	/// Gets a reference to the front matter's data.
 	pub fn data(&self) -> &T {
 		self.0.data.as_ref().expect("missing front matter data")
