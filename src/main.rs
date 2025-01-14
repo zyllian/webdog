@@ -256,11 +256,8 @@ fn main() -> eyre::Result<()> {
 				title,
 				template,
 			} => {
-				let page_path = cli
-					.site
-					.join(webdog::PAGES_PATH)
-					.join(&id)
-					.with_extension("md");
+				let page_path = cli.site.join(webdog::PAGES_PATH).join(&id).with_extension("md");
+				let dir = page_path.parent().expect("should never fail");
 				if page_path.exists() {
 					eprintln!("page already exists!");
 					return Ok(());
@@ -273,7 +270,7 @@ fn main() -> eyre::Result<()> {
 						..Default::default()
 					}),
 				};
-				std::fs::create_dir_all(page_path.parent().expect("should never fail"))?;
+				std::fs::create_dir_all(dir)?;
 				std::fs::write(&page_path, fm.format()?)?;
 
 				println!("Page created! Edit at {:?}.", page_path);
