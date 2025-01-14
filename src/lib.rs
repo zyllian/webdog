@@ -130,6 +130,9 @@ pub struct PageMetadata {
 	/// Custom values passed to the base template.
 	#[serde(default)]
 	pub userdata: serde_yml::Value,
+	/// Whether this page being rendered is a partial. Set by the builder, not your page metadata.
+	#[serde(skip)]
+	pub is_partial: bool,
 }
 
 /// Struct containing information about the site.

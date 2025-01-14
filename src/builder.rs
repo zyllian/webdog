@@ -163,106 +163,164 @@ impl SiteBuilder {
 		head: &Option<String>,
 		scripts: &[String],
 		styles: &[String],
+		is_partial: bool,
 	) -> eyre::Result<String> {
-		let mut output = Vec::new();
-		let mut rewriter = HtmlRewriter::new(
-			Settings {
-				element_content_handlers: vec![
-					element!("body", |el| {
-						if self.serving {
-							el.set_attribute("class", "debug")?;
-						}
-						Ok(())
-					}),
-					element!("head", |el| {
-						el.prepend(r#"<meta charset="utf-8">"#, ContentType::Html);
-						el.append(&format!("<title>{title}</title>"), ContentType::Html);
-						if let Some(head) = head {
-							el.append(head, ContentType::Html);
-						}
-						for script in scripts {
-							el.append(
-								&format!(
-									r#"<script type="text/javascript" src="{script}" defer></script>"#
-								),
-								ContentType::Html,
-							);
-						}
-						for style in styles {
-							el.append(
-								&format!(r#"<link rel="stylesheet" href="/styles/{style}">"#),
-								ContentType::Html,
-							);
-						}
-						el.append(
-							r#"<script type="text/javascript" src="/webdog/webdog.js" defer></script>"#,
-							ContentType::Html,
-						);
-						if self.serving {
-							el.append(r#"<script src="/_dev.js"></script>"#, ContentType::Html);
-						}
+		use kuchikiki::traits::*;
 
-						Ok(())
-					}),
-					element!("a", |el| {
-						if let Some(mut href) = el.get_attribute("href") {
-							if let Some((command, mut new_href)) = href.split_once('$') {
-								#[allow(clippy::single_match)]
-								match command {
-									"me" => {
+		let html = {
+			let document = kuchikiki::parse_html().one(html.clone()).document_node;
+			let mut needs_reserialized = false;
+
+			while let Ok(el) = document.select_first("wd-partial") {
+				needs_reserialized = true;
+				let attr_map = el.attributes.borrow();
+				let template = attr_map
+					.get("t")
+					.ok_or_eyre("missing t attribute on wd-partial")?;
+				let attr_map: HashMap<_, _> = attr_map
+					.map
+					.iter()
+					.map(|(k, v)| (k.local.to_string(), &v.value))
+					.collect();
+				let mut html_buf = Vec::new();
+				for child in el.as_node().children() {
+					child.serialize(&mut html_buf)?;
+				}
+				let html = String::from_utf8(html_buf)?;
+				let new_html = self.build_page_raw(
+					PageMetadata {
+						template: Some(template.to_string()),
+						userdata: serde_yml::to_value(attr_map)?,
+						is_partial: true,
+						..Default::default()
+					},
+					&html,
+					(),
+				)?;
+				let new_doc = kuchikiki::parse_html()
+					.one(new_html)
+					.document_node
+					.select_first("body")
+					.map(|b| b.as_node().children())
+					.expect("should never fail");
+				for child in new_doc {
+					el.as_node().insert_before(child);
+				}
+				el.as_node().detach();
+			}
+
+			if needs_reserialized {
+				let mut html = Vec::new();
+				document.serialize(&mut html)?;
+				String::from_utf8(html)?
+			} else {
+				html
+			}
+		};
+
+		let output = if is_partial {
+			html
+		} else {
+			let mut output = Vec::new();
+			let mut rewriter = HtmlRewriter::new(
+				Settings {
+					element_content_handlers: vec![
+						element!("body", |el| {
+							if self.serving {
+								el.set_attribute("class", "debug")?;
+							}
+							Ok(())
+						}),
+						element!("head", |el| {
+							el.prepend(r#"<meta charset="utf-8">"#, ContentType::Html);
+							el.append(&format!("<title>{title}</title>"), ContentType::Html);
+							if let Some(head) = head {
+								el.append(head, ContentType::Html);
+							}
+							for script in scripts {
+								el.append(
+									&format!(
+										r#"<script type="text/javascript" src="{script}" defer></script>"#
+									),
+									ContentType::Html,
+								);
+							}
+							for style in styles {
+								el.append(
+									&format!(r#"<link rel="stylesheet" href="/styles/{style}">"#),
+									ContentType::Html,
+								);
+							}
+							el.append(
+								r#"<script type="text/javascript" src="/webdog/webdog.js" defer></script>"#,
+								ContentType::Html,
+							);
+							if self.serving {
+								el.append(r#"<script src="/_dev.js"></script>"#, ContentType::Html);
+							}
+
+							Ok(())
+						}),
+						element!("a", |el| {
+							if let Some(mut href) = el.get_attribute("href") {
+								if let Some((command, mut new_href)) = href.split_once('$') {
+									#[allow(clippy::single_match)]
+									match command {
+										"me" => {
+											el.set_attribute(
+												"rel",
+												&(el.get_attribute("rel").unwrap_or_default()
+													+ " me"),
+											)?;
+										}
+										_ => {
+											new_href = &href;
+										}
+									}
+									href = new_href.to_string();
+									el.set_attribute("href", &href)?;
+								}
+								if let Ok(url) = Url::parse(&href) {
+									if url.host().is_some() {
+										// Make external links open in new tabs without referral information
 										el.set_attribute(
 											"rel",
-											&(el.get_attribute("rel").unwrap_or_default() + " me"),
+											(el.get_attribute("rel").unwrap_or_default()
+												+ " noopener noreferrer")
+												.trim(),
 										)?;
-									}
-									_ => {
-										new_href = &href;
+										el.set_attribute("target", "_blank")?;
 									}
 								}
-								href = new_href.to_string();
-								el.set_attribute("href", &href)?;
 							}
-							if let Ok(url) = Url::parse(&href) {
-								if url.host().is_some() {
-									// Make external links open in new tabs without referral information
-									el.set_attribute(
-										"rel",
-										(el.get_attribute("rel").unwrap_or_default()
-											+ " noopener noreferrer")
-											.trim(),
-									)?;
-									el.set_attribute("target", "_blank")?;
+
+							Ok(())
+						}),
+						element!("md", |el| {
+							el.remove();
+							let class = el.get_attribute("class");
+
+							let md_type = el
+								.get_attribute("type")
+								.ok_or_eyre("missing type attribute on markdown tag")?;
+
+							if md_type == "blog-image" {
+								let mut src = el
+									.get_attribute("src")
+									.ok_or_eyre("missing src attribute")?;
+
+								if src.starts_with("cdn$") {
+									src = self.site.config.cdn_url(&src[4..])?.to_string();
 								}
-							}
-						}
 
-						Ok(())
-					}),
-					element!("md", |el| {
-						el.remove();
-						let class = el.get_attribute("class");
+								let class = format!("image {}", class.unwrap_or_default());
+								let content = el
+									.get_attribute("content")
+									.ok_or_eyre("missing content attribute")?;
 
-						let md_type = el
-							.get_attribute("type")
-							.ok_or_eyre("missing type attribute on markdown tag")?;
-
-						if md_type == "blog-image" {
-							let mut src = el
-								.get_attribute("src")
-								.ok_or_eyre("missing src attribute")?;
-
-							if src.starts_with("cdn$") {
-								src = self.site.config.cdn_url(&src[4..])?.to_string();
-							}
-
-							let class = format!("image {}", class.unwrap_or_default());
-							let content = el
-								.get_attribute("content")
-								.ok_or_eyre("missing content attribute")?;
-
-							el.replace(
-								&format!(
-									r#"
+								el.replace(
+									&format!(
+										r#"
 									<div class="{class}">
 										<a href="{src}">
 											<img src="{src}">
@@ -270,26 +328,29 @@ impl SiteBuilder {
 										<span>{content}</span>
 									</div>
 									"#
-								),
-								ContentType::Html,
-							);
-						} else {
-							return Err(eyre!("unknown markdown tag type: {md_type}").into());
-						}
+									),
+									ContentType::Html,
+								);
+							} else {
+								return Err(eyre!("unknown markdown tag type: {md_type}").into());
+							}
 
-						Ok(())
-					}),
-				],
-				strict: true,
-				..Default::default()
-			},
-			|c: &[u8]| output.extend_from_slice(c),
-		);
+							Ok(())
+						}),
+					],
+					strict: true,
+					..Default::default()
+				},
+				|c: &[u8]| output.extend_from_slice(c),
+			);
 
-		rewriter.write(html.as_bytes())?;
-		rewriter.end()?;
+			rewriter.write(html.as_bytes())?;
+			rewriter.end()?;
 
-		Ok(String::from_utf8(output)?)
+			String::from_utf8(output)?
+		};
+
+		Ok(output)
 	}
 
 	/// Helper to build a page without writing it to disk.
@@ -334,6 +395,7 @@ impl SiteBuilder {
 			&head,
 			&page_metadata.scripts,
 			&page_metadata.styles,
+			page_metadata.is_partial,
 		)?;
 
 		if let Some(data) = extra {

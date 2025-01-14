@@ -20,6 +20,10 @@ learn about standard webdog pages here
 
 learn how to use webdog templates
 
+## <a href="webdog-html">webdog html</a>
+
+learn about webdog html extensions
+
 ## <a href="styling">styling</a>
 
 learn about webdog styling

@@ -12,6 +12,7 @@
 	{{ self::docLink(text="configuration", href="config") }}
 	{{ self::docLink(text="pages", href="pages") }}
 	{{ self::docLink(text="templates", href="templates") }}
+	{{ self::docLink(text="webdog html", href="webdog-html") }}
 	{{ self::docLink(text="styling", href="styling") }}
 	{{ self::docLink(text="resources", href="resources") }}
 	{{ self::docLink(text="webdog assumptions", href="wd-assumptions") }}
