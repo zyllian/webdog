@@ -6,7 +6,7 @@
   let socket;
 
   function start(reload) {
-    socket = new WebSocket("ws://127.0.0.1:8080");
+    socket = new WebSocket(`ws://${location.host}`);
     let reloading = false;
     socket.onmessage = function (ev) {
       if (ev.data === "reload") {
