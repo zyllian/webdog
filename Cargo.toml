@@ -2,7 +2,7 @@
 description = "static site generator fit for a dog"
 edition = "2021"
 homepage = "https://webdog.zyl.gay"
-license = "AGPLv2"
+license = "AGPL-3.0-or-later"
 name = "webdog"
 readme = "README.md"
 repository = "https://github.com/zyllian/webdog"
