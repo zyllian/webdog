@@ -261,10 +261,28 @@ impl SiteBuilder {
 
 							Ok(())
 						}),
+						element!("img", |el| {
+							if let Some(mut src) = el.get_attribute("src") {
+								if let Some((command, new_src)) = src.split_once('$') {
+									let mut new_src = new_src.to_string();
+									#[allow(clippy::single_match)]
+									match command {
+										"cdn" => {
+											new_src = self.site.config.cdn_url(&new_src)?.to_string();
+										}
+										_ => new_src = src,
+									}
+									src = new_src;
+									el.set_attribute("src", &src)?;
+								}
+							}
+
+							Ok(())
+						}),
 						element!("a", |el| {
 							if let Some(mut href) = el.get_attribute("href") {
-								if let Some((command, mut new_href)) = href.split_once('$') {
-									#[allow(clippy::single_match)]
+								if let Some((command, new_href)) = href.split_once('$') {
+									let mut new_href = new_href.to_string();
 									match command {
 										"me" => {
 											el.set_attribute(
@@ -273,11 +291,14 @@ impl SiteBuilder {
 													+ " me"),
 											)?;
 										}
+										"cdn" => {
+											new_href = self.site.config.cdn_url(&new_href)?.to_string();
+										}
 										_ => {
-											new_href = &href;
+											new_href = href;
 										}
 									}
-									href = new_href.to_string();
+									href = new_href;
 									el.set_attribute("href", &href)?;
 								}
 								if let Ok(url) = Url::parse(&href) {
@@ -292,47 +313,6 @@ impl SiteBuilder {
 										el.set_attribute("target", "_blank")?;
 									}
 								}
-							}
-
-							Ok(())
-						}),
-						element!("md", |el| {
-							el.remove();
-							let class = el.get_attribute("class");
-
-							let md_type = el
-								.get_attribute("type")
-								.ok_or_eyre("missing type attribute on markdown tag")?;
-
-							if md_type == "blog-image" {
-								let mut src = el
-									.get_attribute("src")
-									.ok_or_eyre("missing src attribute")?;
-
-								if src.starts_with("cdn$") {
-									src = self.site.config.cdn_url(&src[4..])?.to_string();
-								}
-
-								let class = format!("image {}", class.unwrap_or_default());
-								let content = el
-									.get_attribute("content")
-									.ok_or_eyre("missing content attribute")?;
-
-								el.replace(
-									&format!(
-										r#"
-									<div class="{class}">
-										<a href="{src}">
-											<img src="{src}">
-										</a>
-										<span>{content}</span>
-									</div>
-									"#
-									),
-									ContentType::Html,
-								);
-							} else {
-								return Err(eyre!("unknown markdown tag type: {md_type}").into());
 							}
 
 							Ok(())
