@@ -5,7 +5,7 @@ welcome to webdog, the static site generator fit for a dog :3
 if you have [rust](https://rust-lang.org) installed, all you need to do to install webdog is run the following command:
 
 ```sh
-cargo install webdog --git https://github.com/zyllian/webdog
+cargo install webdog
 ```
 
 then you can make your first webdog site!
