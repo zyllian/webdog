@@ -5,14 +5,13 @@ use std::{
 
 use eyre::Context;
 use itertools::Itertools;
-use pulldown_cmark::{Options, Parser};
 use rss::{validation::Validate, ChannelBuilder, ItemBuilder};
 use serde::{Deserialize, Serialize};
 use time::{format_description::well_known::Rfc2822, OffsetDateTime};
 
 use crate::{
 	builder::SiteBuilder, frontmatter::FrontMatterRequired, link_list::Link,
-	util::format_timestamp, PageMetadata,
+	util::{self, format_timestamp}, PageMetadata,
 };
 
 /// Metadata for resources.
@@ -182,10 +181,7 @@ impl ResourceBuilder {
 		let mut page = FrontMatterRequired::<ResourceMetadata>::parse(input)
 			.wrap_err_with(|| eyre::eyre!("Failed to parse resource front matter"))?;
 
-		let parser = Parser::new_ext(&page.content, Options::all());
-		let mut html = String::new();
-		pulldown_cmark::html::push_html(&mut html, parser);
-		*page.content_mut() = html;
+		*page.content_mut() = util::render_markdown(builder, &page.content)?;
 
 		let data = page.data_mut();
 		if let Some(cdn_file) = &data.cdn_file {

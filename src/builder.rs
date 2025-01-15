@@ -4,7 +4,6 @@ use std::{collections::HashMap, path::PathBuf};
 
 use eyre::{eyre, Context, OptionExt};
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
-use pulldown_cmark::{Options, Parser};
 use rayon::prelude::*;
 use serde::Serialize;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
@@ -399,49 +398,7 @@ impl SiteBuilder {
 			.with_context(|| format!("Failed to read page at {}", page_path.display()))?;
 		let page = crate::frontmatter::FrontMatter::parse(input)?;
 
-		let mut language = None;
-		let parser = Parser::new_ext(&page.content, Options::all()).filter_map(|event| {
-			// syntax highlighting for code blocks
-			match event {
-				pulldown_cmark::Event::Start(pulldown_cmark::Tag::CodeBlock(
-					pulldown_cmark::CodeBlockKind::Fenced(name),
-				)) => {
-					language = Some(name);
-					None
-				}
-				pulldown_cmark::Event::Text(code) => {
-					if let Some(language) = language.take() {
-						let syntax_reference = self
-							.syntax_set
-							.find_syntax_by_token(&language)
-							.unwrap_or_else(|| self.syntax_set.find_syntax_plain_text());
-						let html = format!(
-							r#"<div class="wd-codeblock">
-								<button class="copy">Copy</button>
-								{}
-							</div>"#,
-							syntect::html::highlighted_html_for_string(
-								&code,
-								&self.syntax_set,
-								syntax_reference,
-								self.theme_set
-									.themes
-									.get(&self.site.config.code_theme)
-									.as_ref()
-									.expect("should never fail"),
-							)
-							.expect("failed to highlight syntax")
-						);
-						Some(pulldown_cmark::Event::Html(html.into()))
-					} else {
-						Some(pulldown_cmark::Event::Text(code))
-					}
-				}
-				_ => Some(event),
-			}
-		});
-		let mut page_html = String::new();
-		pulldown_cmark::html::push_html(&mut page_html, parser);
+		let page_html = util::render_markdown(self, &page.content)?;
 
 		let out = self.build_page_raw(page.data.unwrap_or_default(), &page_html, ())?;
 
