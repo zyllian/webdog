@@ -1,6 +1,11 @@
 [package]
+description = "static site generator fit for a dog"
 edition = "2021"
+homepage = "https://webdog.zyl.gay"
+license = "AGPLv2"
 name = "webdog"
+readme = "README.md"
+repository = "https://github.com/zyllian/webdog"
 version = "0.1.0"
 
 [dependencies]
