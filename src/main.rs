@@ -135,7 +135,7 @@ fn main() -> eyre::Result<()> {
 			let config = SiteConfig::new(base_url.clone(), cdn_url.unwrap_or(base_url), title);
 			std::fs::write(
 				cli.site.join(SiteConfig::FILENAME),
-				serde_yml::to_string(&config)?,
+				serde_yaml_ng::to_string(&config)?,
 			)?;
 			DEFAULT_PROJECT.extract(&cli.site)?;
 			std::fs::create_dir(cli.site.join(webdog::ROOT_PATH))?;
@@ -227,7 +227,7 @@ fn main() -> eyre::Result<()> {
 
 				config.resources.insert(id.clone(), resource_config);
 
-				std::fs::write(config_path, serde_yml::to_string(&config)?)?;
+				std::fs::write(config_path, serde_yaml_ng::to_string(&config)?)?;
 
 				let resource_path = cli.site.join(webdog::RESOURCES_PATH).join(&id);
 				std::fs::create_dir_all(&resource_path)?;
@@ -240,7 +240,7 @@ fn main() -> eyre::Result<()> {
 						tags: vec!["first".to_string()],
 						cdn_file: None,
 						desc: Some(format!("This is the first {name} :)")),
-						inner: serde_yml::Value::Null,
+						inner: serde_yaml_ng::Value::Null,
 						draft: true,
 					},
 				)?;
@@ -256,7 +256,11 @@ fn main() -> eyre::Result<()> {
 				title,
 				template,
 			} => {
-				let page_path = cli.site.join(webdog::PAGES_PATH).join(&id).with_extension("md");
+				let page_path = cli
+					.site
+					.join(webdog::PAGES_PATH)
+					.join(&id)
+					.with_extension("md");
 				let dir = page_path.parent().expect("should never fail");
 				if page_path.exists() {
 					eprintln!("page already exists!");
@@ -310,7 +314,7 @@ fn main() -> eyre::Result<()> {
 						tags,
 						cdn_file: None,
 						desc: description,
-						inner: serde_yml::Value::Null,
+						inner: serde_yaml_ng::Value::Null,
 						draft: !skip_draft,
 					},
 				)?;

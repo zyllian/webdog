@@ -100,7 +100,9 @@ impl SiteConfig {
 		if !config_path.exists() {
 			eyre::bail!("no site config found!");
 		}
-		Ok(serde_yml::from_str(&std::fs::read_to_string(config_path)?)?)
+		Ok(serde_yaml_ng::from_str(&std::fs::read_to_string(
+			config_path,
+		)?)?)
 	}
 }
 
@@ -129,7 +131,7 @@ pub struct PageMetadata {
 	pub extra: Option<ExtraData>,
 	/// Custom values passed to the base template.
 	#[serde(default)]
-	pub userdata: serde_yml::Value,
+	pub userdata: serde_yaml_ng::Value,
 	/// Whether this page being rendered is a partial. Set by the builder, not your page metadata.
 	#[serde(skip)]
 	pub is_partial: bool,

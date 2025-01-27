@@ -95,7 +95,7 @@ fn create(
 			builder.build_all_resources()?;
 		}
 	} else if relative_path.display().to_string() == SiteConfig::FILENAME {
-		let new_config = serde_yml::from_str(&std::fs::read_to_string(path)?)?;
+		let new_config = serde_yaml_ng::from_str(&std::fs::read_to_string(path)?)?;
 		builder.site.config = new_config;
 		builder.reload()?;
 		builder.build_all()?;

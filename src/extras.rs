@@ -30,7 +30,7 @@ impl Extra {
 
 		match self {
 			Self::Basic => {
-				let data: BasicData = serde_yml::from_value(data.inner.clone())?;
+				let data: BasicData = serde_yaml_ng::from_value(data.inner.clone())?;
 				let content = builder.tera.render(&data.template, &tera::Context::new())?;
 				append_to(&page, &content, "main.page")
 			}
@@ -46,7 +46,7 @@ pub struct ExtraData {
 	pub name: String,
 	/// The inner data for the extra.
 	#[serde(flatten)]
-	pub inner: serde_yml::Value,
+	pub inner: serde_yaml_ng::Value,
 }
 
 /// Gets the extra for the given value.
@@ -90,7 +90,7 @@ fn resource_list_outside(
 		resources: Vec<ResourceTemplateData<'r>>,
 	}
 
-	let data: ResourceListData = serde_yml::from_value(data.inner.clone())?;
+	let data: ResourceListData = serde_yaml_ng::from_value(data.inner.clone())?;
 
 	let res_builder = builder
 		.resource_builders

@@ -10,8 +10,11 @@ use serde::{Deserialize, Serialize};
 use time::{format_description::well_known::Rfc2822, OffsetDateTime};
 
 use crate::{
-	builder::SiteBuilder, frontmatter::FrontMatterRequired, link_list::Link,
-	util::{self, format_timestamp}, PageMetadata,
+	builder::SiteBuilder,
+	frontmatter::FrontMatterRequired,
+	link_list::Link,
+	util::{self, format_timestamp},
+	PageMetadata,
 };
 
 /// Metadata for resources.
@@ -30,7 +33,7 @@ pub struct ResourceMetadata {
 	pub desc: Option<String>,
 	/// Extra resource data not included.
 	#[serde(flatten)]
-	pub inner: serde_yml::Value,
+	pub inner: serde_yaml_ng::Value,
 	/// Whether the resource is a draft. Drafts can be committed without being published to the live site.
 	#[serde(default)]
 	pub draft: bool,

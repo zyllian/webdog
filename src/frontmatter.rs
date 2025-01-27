@@ -32,7 +32,7 @@ where
 	pub fn parse(input: String) -> eyre::Result<Self> {
 		if input.starts_with("---\n") {
 			if let Some((frontmatter, content)) = input[3..].split_once("\n---\n") {
-				let data = serde_yml::from_str(frontmatter)?;
+				let data = serde_yaml_ng::from_str(frontmatter)?;
 				return Ok(Self {
 					content: content.to_string(),
 					data,
@@ -56,7 +56,7 @@ where
 
 		if let Some(data) = &self.data {
 			output.push_str("---\n");
-			output.push_str(&serde_yml::to_string(data)?);
+			output.push_str(&serde_yaml_ng::to_string(data)?);
 			output.push_str("---\n\n");
 		}
 

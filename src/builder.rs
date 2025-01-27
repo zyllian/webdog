@@ -25,7 +25,7 @@ struct TemplateData<'a, T> {
 	/// Custom template data.
 	pub data: T,
 	/// Userdata supplied from the page.
-	pub userdata: serde_yml::Value,
+	pub userdata: serde_yaml_ng::Value,
 }
 
 /// Struct used to build the site.
@@ -189,7 +189,7 @@ impl SiteBuilder {
 				let new_html = self.build_page_raw(
 					PageMetadata {
 						template: Some(template.to_string()),
-						userdata: serde_yml::to_value(attr_map)?,
+						userdata: serde_yaml_ng::to_value(attr_map)?,
 						is_partial: true,
 						..Default::default()
 					},
@@ -267,7 +267,8 @@ impl SiteBuilder {
 									#[allow(clippy::single_match)]
 									match command {
 										"cdn" => {
-											new_src = self.site.config.cdn_url(&new_src)?.to_string();
+											new_src =
+												self.site.config.cdn_url(&new_src)?.to_string();
 										}
 										_ => new_src = src,
 									}
@@ -291,7 +292,8 @@ impl SiteBuilder {
 											)?;
 										}
 										"cdn" => {
-											new_href = self.site.config.cdn_url(&new_href)?.to_string();
+											new_href =
+												self.site.config.cdn_url(&new_href)?.to_string();
 										}
 										_ => {
 											new_href = href;
