@@ -3,7 +3,7 @@
 webdog, the static site generator fit for a dog :3
 
 ```sh
-cargo install webdog
+cargo install webdog --locked
 ```
 
 after installing, you can create your first site:
