@@ -1,6 +1,6 @@
 [package]
 description = "static site generator fit for a dog"
-edition = "2021"
+edition = "2024"
 homepage = "https://webdog.zyl.gay"
 license = "AGPL-3.0-or-later"
 name = "webdog"
