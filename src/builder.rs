@@ -2,15 +2,15 @@
 
 use std::{collections::HashMap, path::PathBuf};
 
-use eyre::{eyre, Context, OptionExt};
-use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
+use eyre::{Context, OptionExt, eyre};
+use lol_html::{HtmlRewriter, Settings, element, html_content::ContentType};
 use rayon::prelude::*;
 use serde::Serialize;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tera::Tera;
 use url::Url;
 
-use crate::{resource::ResourceBuilder, util, PageMetadata, Site, ROOT_PATH, SASS_PATH};
+use crate::{PageMetadata, ROOT_PATH, SASS_PATH, Site, resource::ResourceBuilder, util};
 
 /// Default path for static webdog resources included with the site build.
 const WEBDOG_DEFAULT_PATH: &str = "webdog";
@@ -161,6 +161,7 @@ impl SiteBuilder {
 	}
 
 	/// Function to rewrite HTML wow.
+	#[allow(clippy::too_many_arguments)]
 	pub fn rewrite_html(
 		&self,
 		html: String,
@@ -169,6 +170,7 @@ impl SiteBuilder {
 		scripts: &[String],
 		styles: &[String],
 		is_partial: bool,
+		webdog_path: &str,
 	) -> eyre::Result<String> {
 		use kuchikiki::traits::*;
 
@@ -257,7 +259,9 @@ impl SiteBuilder {
 								);
 							}
 							el.append(
-								r#"<script type="text/javascript" src="/webdog/webdog.js" defer></script>"#,
+								&format!(
+									r#"<script type="text/javascript" src="/{webdog_path}/webdog.js" defer></script>"#
+								),
 								ContentType::Html,
 							);
 							if self.serving {
@@ -383,6 +387,12 @@ impl SiteBuilder {
 			&page_metadata.scripts,
 			&page_metadata.styles,
 			page_metadata.is_partial,
+			&self
+				.site
+				.config
+				.webdog_path
+				.clone()
+				.unwrap_or_else(|| WEBDOG_DEFAULT_PATH.to_string()),
 		)?;
 
 		if let Some(data) = extra {
