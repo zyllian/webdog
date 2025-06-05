@@ -37,6 +37,10 @@ list of sass/scss stylesheets in the site's `sass` directory to treat as root st
 
 base url for the various cdn url transformation features of webdog.
 
+## `webdog_path`
+
+optional custom path for webdog's static resources.
+
 ## `code_theme`
 
 the theme to use for code blocks. valid options: `base16-ocean.dark`, `base16-eighties.dark`, `base16-mocha.dark`, `base16-ocean.light`, `InspiredGitHub`, `Solarized (dark)`, and `Solarized (light)`
