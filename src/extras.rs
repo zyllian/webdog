@@ -1,5 +1,4 @@
-use itertools::Itertools;
-use lol_html::{element, RewriteStrSettings};
+use lol_html::{RewriteStrSettings, element};
 use serde::{Deserialize, Serialize};
 
 use crate::{builder::SiteBuilder, resource::ResourceTemplateData};
@@ -111,10 +110,12 @@ fn resource_list_outside(
 					)
 					.map(|ts| (id, v, ts))
 				})
-				.map_ok(|(id, v, ts)| ResourceTemplateData {
-					resource: v,
-					id: id.clone(),
-					readable_timestamp: ts,
+				.map(|v| {
+					v.map(|(id, v, ts)| ResourceTemplateData {
+						resource: v,
+						id: id.clone(),
+						readable_timestamp: ts,
+					})
 				})
 				.collect::<eyre::Result<Vec<_>>>()?,
 		})?,

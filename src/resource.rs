@@ -4,17 +4,16 @@ use std::{
 };
 
 use eyre::Context;
-use itertools::Itertools;
-use rss::{validation::Validate, ChannelBuilder, ItemBuilder};
+use rss::{ChannelBuilder, ItemBuilder, validation::Validate};
 use serde::{Deserialize, Serialize};
-use time::{format_description::well_known::Rfc2822, OffsetDateTime};
+use time::{OffsetDateTime, format_description::well_known::Rfc2822};
 
 use crate::{
+	PageMetadata,
 	builder::SiteBuilder,
 	frontmatter::FrontMatterRequired,
 	link_list::Link,
 	util::{self, format_timestamp},
-	PageMetadata,
 };
 
 /// Metadata for resources.
@@ -319,7 +318,7 @@ impl ResourceBuilder {
 			let page_max = list.len() / items_per_page + (list.len() % items_per_page).min(1);
 			let mut previous = None;
 			let mut next;
-			for (page, iter) in list.iter().chunks(items_per_page).into_iter().enumerate() {
+			for (page, iter) in list.chunks(items_per_page).enumerate() {
 				next = (page + 1 != page_max).then_some(page + 2);
 				let out = builder.build_page_raw(
 					PageMetadata {
@@ -329,7 +328,7 @@ impl ResourceBuilder {
 					},
 					"",
 					ResourceListTemplateData {
-						resources: iter.copied().collect(),
+						resources: iter.to_vec(),
 						tag,
 						rss_enabled: config.rss.is_some(),
 						page: page + 1,
@@ -372,7 +371,7 @@ impl ResourceBuilder {
 
 		// Build list of tags
 		{
-			let links = tags
+			let mut links: Vec<_> = tags
 				.iter()
 				.map(|(tag, data)| {
 					let count = data.len();
@@ -384,9 +383,9 @@ impl ResourceBuilder {
 						count,
 					)
 				})
-				.sorted_by(|(_, a), (_, b)| b.cmp(a))
-				.map(|(l, _)| l)
 				.collect();
+			links.sort_by(|(_, a), (_, b)| b.cmp(a));
+			let links = links.into_iter().map(|(l, _)| l).collect();
 			let out = crate::link_list::render_basic_link_list(
 				builder,
 				&self.config.tag_list_template,
