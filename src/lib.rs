@@ -49,6 +49,8 @@ pub struct SiteConfig {
 	pub sass_styles: Vec<PathBuf>,
 	/// URL to the CDN used for the site's images.
 	pub cdn_url: Url,
+	/// The path to output webdog static resources to. Defaults to "webdog"
+	pub webdog_path: Option<String>,
 	/// The theme to use for the site's code blocks.
 	/// TODO: dark/light themes
 	/// TODO: export themes as CSS instead of styling HTML directly
@@ -73,6 +75,7 @@ impl SiteConfig {
 			build: None,
 			sass_styles: vec!["index.scss".into()],
 			cdn_url,
+			webdog_path: None,
 			code_theme: "base16-ocean.dark".to_string(),
 			resources: Default::default(),
 		}

@@ -12,8 +12,8 @@ use url::Url;
 
 use crate::{resource::ResourceBuilder, util, PageMetadata, Site, ROOT_PATH, SASS_PATH};
 
-/// Path for static webdog resources included with the site build.
-const WEBDOG_PATH: &str = "webdog";
+/// Default path for static webdog resources included with the site build.
+const WEBDOG_DEFAULT_PATH: &str = "webdog";
 
 /// Struct containing data to be sent to templates when rendering them.
 #[derive(Debug, Serialize)]
@@ -96,7 +96,13 @@ impl SiteBuilder {
 			std::fs::create_dir(&self.build_path).wrap_err("Failed to create build directory")?;
 		}
 
-		let webdog_path = self.build_path.join(WEBDOG_PATH);
+		let webdog_path = self.build_path.join(
+			self.site
+				.config
+				.webdog_path
+				.clone()
+				.unwrap_or_else(|| WEBDOG_DEFAULT_PATH.to_string()),
+		);
 		std::fs::create_dir(&webdog_path)?;
 		std::fs::write(
 			webdog_path.join("webdog.js"),
