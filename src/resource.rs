@@ -98,6 +98,7 @@ impl EmbedMetadata {
 #[derive(Debug, Serialize)]
 struct ResourceListTemplateData<'r> {
 	resources: Vec<&'r ResourceTemplateData<'r>>,
+	has_tags: bool,
 	tag: Option<&'r str>,
 	rss_enabled: bool,
 	page: usize,
@@ -290,6 +291,8 @@ impl ResourceBuilder {
 			self.build(builder, id.clone(), resource)?;
 		}
 
+		let resource_has_tags = lmd.iter().any(|(_, r)| !r.data().tags.is_empty());
+
 		let mut data = Vec::with_capacity(lmd.len());
 		for (id, resource) in lmd.iter() {
 			data.push(ResourceTemplateData {
@@ -302,6 +305,7 @@ impl ResourceBuilder {
 			});
 		}
 
+		#[allow(clippy::too_many_arguments)]
 		fn build_list(
 			builder: &SiteBuilder,
 			config: &ResourceBuilderConfig,
@@ -310,6 +314,7 @@ impl ResourceBuilder {
 			tag: Option<&str>,
 			out_path: &Path,
 			items_per_page: usize,
+			resource_has_tags: bool,
 		) -> eyre::Result<()> {
 			if !out_path.exists() {
 				std::fs::create_dir_all(out_path)?;
@@ -329,6 +334,7 @@ impl ResourceBuilder {
 					"",
 					ResourceListTemplateData {
 						resources: iter.to_vec(),
+						has_tags: resource_has_tags,
 						tag,
 						rss_enabled: config.rss.is_some(),
 						page: page + 1,
@@ -359,52 +365,56 @@ impl ResourceBuilder {
 			None,
 			&out_long,
 			self.config.resources_per_page,
+			resource_has_tags,
 		)?;
 
-		// Build resource lists by tag
-		let mut tags: BTreeMap<String, Vec<&ResourceTemplateData>> = BTreeMap::new();
-		for resource in &data {
-			for tag in resource.resource.data().tags.iter().cloned() {
-				tags.entry(tag).or_default().push(resource);
+		if resource_has_tags {
+			// Build resource lists by tag
+			let mut tags: BTreeMap<String, Vec<&ResourceTemplateData>> = BTreeMap::new();
+			for resource in &data {
+				for tag in resource.resource.data().tags.iter().cloned() {
+					tags.entry(tag).or_default().push(resource);
+				}
 			}
-		}
 
-		// Build list of tags
-		{
-			let mut links: Vec<_> = tags
-				.iter()
-				.map(|(tag, data)| {
-					let count = data.len();
-					(
-						Link::new(
-							format!("/{}/tag/{tag}/", self.config.output_path_resources),
-							format!("{tag} ({count})"),
-						),
-						count,
-					)
-				})
-				.collect();
-			links.sort_by(|(_, a), (_, b)| b.cmp(a));
-			let links = links.into_iter().map(|(l, _)| l).collect();
-			let out = crate::link_list::render_basic_link_list(
-				builder,
-				&self.config.tag_list_template,
-				links,
-				&self.config.tag_list_title,
-			)?;
-			std::fs::write(out_short.join("tags.html"), out)?;
-		}
+			// Build list of tags
+			{
+				let mut links: Vec<_> = tags
+					.iter()
+					.map(|(tag, data)| {
+						let count = data.len();
+						(
+							Link::new(
+								format!("/{}/tag/{tag}/", self.config.output_path_resources),
+								format!("{tag} ({count})"),
+							),
+							count,
+						)
+					})
+					.collect();
+				links.sort_by(|(_, a), (_, b)| b.cmp(a));
+				let links = links.into_iter().map(|(l, _)| l).collect();
+				let out = crate::link_list::render_basic_link_list(
+					builder,
+					&self.config.tag_list_template,
+					links,
+					&self.config.tag_list_title,
+				)?;
+				std::fs::write(out_short.join("tags.html"), out)?;
+			}
 
-		for (tag, data) in tags {
-			build_list(
-				builder,
-				&self.config,
-				data,
-				&format!("{} tagged {tag}", self.config.resource_name_plural),
-				Some(tag.as_str()),
-				&out_short.join("tag").join(&tag),
-				self.config.resources_per_page,
-			)?;
+			for (tag, data) in tags {
+				build_list(
+					builder,
+					&self.config,
+					data,
+					&format!("{} tagged {tag}", self.config.resource_name_plural),
+					Some(tag.as_str()),
+					&out_short.join("tag").join(&tag),
+					self.config.resources_per_page,
+					true,
+				)?;
+			}
 		}
 
 		// Build RSS feed

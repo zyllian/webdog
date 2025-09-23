@@ -1,5 +1,6 @@
 {% extends "base.tera" %}
 {% block content %}
+{% if data.has_tags %}
 {% if data.tag %}
 <h1>!!RESOURCE_NAME_PLURAL!! tagged {{ data.tag }}</h1>
 <p><a href="/!!RESOURCE_TYPE!!/">View all !!RESOURCE_NAME_PLURAL_LOWERCASE!!</a></p>
@@ -8,6 +9,7 @@
 <p><a href="tags">view !!RESOURCE_NAME!! tags</a></p>
 {% if data.rss_enabled %}
 <p><a href="rss.xml">rss feed</a></p>
+{% endif %}
 {% endif %}
 {% endif %}
 <h1>Page {{ data.page }}/{{ data.page_max }}</h1>

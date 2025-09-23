@@ -10,6 +10,7 @@
 	<div>
 		{{ data.content | safe }}
 	</div>
+	{% if data.tags %}
 	<hr />
 	<h3>tags</h3>
 	<div>
@@ -17,5 +18,6 @@
 		<a href="/!!RESOURCE_TYPE!!/tag/{{tag}}">{{ tag }}</a>{% if not loop.last %},{% endif %}
 		{% endfor %}
 	</div>
+	{% endif %}
 </div>
 {% endblock content %}
