@@ -1,13 +1,13 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
-use include_dir::{include_dir, Dir};
-use time::{format_description::well_known::Rfc3339, OffsetDateTime};
+use include_dir::{Dir, include_dir};
+use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use url::Url;
 use webdog::{
+	PageMetadata, Site, SiteConfig,
 	frontmatter::FrontMatter,
 	resource::{ResourceBuilderConfig, ResourceMetadata, ResourceRSSBuilderConfig},
-	PageMetadata, Site, SiteConfig,
 };
 
 /// The default project to use when creating a new one, embedded into the binary.
@@ -245,7 +245,10 @@ fn main() -> eyre::Result<()> {
 					},
 				)?;
 
-				println!("Created the new resource type {id}! The first resource of this time is available at {:?}.", resource_path);
+				println!(
+					"Created the new resource type {id}! The first resource of this time is available at {:?}.",
+					resource_path
+				);
 
 				Ok(())
 			}

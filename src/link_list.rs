@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use serde::Serialize;
 
-use crate::{builder::SiteBuilder, PageMetadata};
+use crate::{PageMetadata, builder::SiteBuilder};
 
 /// Helper for links.
 #[derive(Debug, Serialize)]

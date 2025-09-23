@@ -55,7 +55,8 @@ pub fn render_markdown(builder: &SiteBuilder, input: &str) -> eyre::Result<Strin
 							&code,
 							&builder.syntax_set,
 							syntax_reference,
-							builder.theme_set
+							builder
+								.theme_set
 								.themes
 								.get(&builder.site.config.code_theme)
 								.as_ref()

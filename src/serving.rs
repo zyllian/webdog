@@ -11,15 +11,15 @@ use eyre::Context;
 use futures::SinkExt;
 use hotwatch::{EventKind, Hotwatch};
 use warp::{
+	Filter,
 	hyper::StatusCode,
 	path::FullPath,
 	reply::Response,
 	ws::{Message, WebSocket},
-	Filter,
 };
 
 use crate::{
-	Site, SiteBuilder, SiteConfig, PAGES_PATH, RESOURCES_PATH, ROOT_PATH, SASS_PATH, TEMPLATES_PATH,
+	PAGES_PATH, RESOURCES_PATH, ROOT_PATH, SASS_PATH, Site, SiteBuilder, SiteConfig, TEMPLATES_PATH,
 };
 
 /// Helper to get the "name" of a path.
