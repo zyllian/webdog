@@ -162,17 +162,18 @@ impl Site {
 			let entry = entry.wrap_err("Failed to read page entry")?;
 			let path = entry.path();
 
-			if let Some(ext) = path.extension() {
-				if ext == "md" && entry.file_type().is_file() {
-					page_index.insert(
-						path.strip_prefix(&pages_path)
-							.wrap_err("This really shouldn't have happened")?
-							.with_extension("")
-							.to_string_lossy()
-							.to_string(),
-						path.to_owned(),
-					);
-				}
+			if let Some(ext) = path.extension()
+				&& ext == "md"
+				&& entry.file_type().is_file()
+			{
+				page_index.insert(
+					path.strip_prefix(&pages_path)
+						.wrap_err("This really shouldn't have happened")?
+						.with_extension("")
+						.to_string_lossy()
+						.to_string(),
+					path.to_owned(),
+				);
 			}
 		}
 

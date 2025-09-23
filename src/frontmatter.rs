@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 /// Very basic YAML front matter parser.
 #[derive(Debug, Serialize, Deserialize)]
@@ -30,14 +30,14 @@ where
 {
 	/// Parses the given input for front matter.
 	pub fn parse(input: String) -> eyre::Result<Self> {
-		if input.starts_with("---\n") {
-			if let Some((frontmatter, content)) = input[3..].split_once("\n---\n") {
-				let data = serde_yaml_ng::from_str(frontmatter)?;
-				return Ok(Self {
-					content: content.to_string(),
-					data,
-				});
-			}
+		if input.starts_with("---\n")
+			&& let Some((frontmatter, content)) = input[3..].split_once("\n---\n")
+		{
+			let data = serde_yaml_ng::from_str(frontmatter)?;
+			return Ok(Self {
+				content: content.to_string(),
+				data,
+			});
 		}
 		Ok(Self {
 			content: input,

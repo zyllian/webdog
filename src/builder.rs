@@ -271,20 +271,19 @@ impl SiteBuilder {
 							Ok(())
 						}),
 						element!("img", |el| {
-							if let Some(mut src) = el.get_attribute("src") {
-								if let Some((command, new_src)) = src.split_once('$') {
-									let mut new_src = new_src.to_string();
-									#[allow(clippy::single_match)]
-									match command {
-										"cdn" => {
-											new_src =
-												self.site.config.cdn_url(&new_src)?.to_string();
-										}
-										_ => new_src = src,
+							if let Some(mut src) = el.get_attribute("src")
+								&& let Some((command, new_src)) = src.split_once('$')
+							{
+								let mut new_src = new_src.to_string();
+								#[allow(clippy::single_match)]
+								match command {
+									"cdn" => {
+										new_src = self.site.config.cdn_url(&new_src)?.to_string();
 									}
-									src = new_src;
-									el.set_attribute("src", &src)?;
+									_ => new_src = src,
 								}
+								src = new_src;
+								el.set_attribute("src", &src)?;
 							}
 
 							Ok(())
@@ -312,17 +311,17 @@ impl SiteBuilder {
 									href = new_href;
 									el.set_attribute("href", &href)?;
 								}
-								if let Ok(url) = Url::parse(&href) {
-									if url.host().is_some() {
-										// Make external links open in new tabs without referral information
-										el.set_attribute(
-											"rel",
-											(el.get_attribute("rel").unwrap_or_default()
-												+ " noopener noreferrer")
-												.trim(),
-										)?;
-										el.set_attribute("target", "_blank")?;
-									}
+								if let Ok(url) = Url::parse(&href)
+									&& url.host().is_some()
+								{
+									// Make external links open in new tabs without referral information
+									el.set_attribute(
+										"rel",
+										(el.get_attribute("rel").unwrap_or_default()
+											+ " noopener noreferrer")
+											.trim(),
+									)?;
+									el.set_attribute("target", "_blank")?;
 								}
 							}
 
@@ -395,10 +394,10 @@ impl SiteBuilder {
 				.unwrap_or_else(|| WEBDOG_DEFAULT_PATH.to_string()),
 		)?;
 
-		if let Some(data) = extra {
-			if let Some(extra) = crate::extras::get_extra(&data.name) {
-				out = extra.handle(out, self, &data)?;
-			}
+		if let Some(data) = extra
+			&& let Some(extra) = crate::extras::get_extra(&data.name)
+		{
+			out = extra.handle(out, self, &data)?;
 		}
 
 		if !self.serving {
