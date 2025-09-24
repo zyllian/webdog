@@ -141,7 +141,7 @@ the timestamp follows the [RFC 3339 format](https://www.rfc-editor.org/rfc/rfc33
 
 ### `tags`
 
-array of the resource's tags. tags are used to group resources together and are at present **required**.
+array of the resource's tags. tags are used to group resources together.
 
 ### `cdn_file` (optional)
 
