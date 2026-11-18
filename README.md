@@ -1,5 +1,7 @@
 # webdog
 
+## Moved to [Codeberg](https://codeberg.org/zylpup/webdog).
+
 webdog, the static site generator fit for a dog :3
 
 ```sh
